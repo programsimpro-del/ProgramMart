@@ -1,112 +1,102 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ร้านของฉัน</title>
 <style>
-  :root{
-    --blue:#0b5ed7; --blue-d:#084bb0; --blue-l:#2f8cff;
-    --yellow:#ffc233; --bg:#f3f6fb; --card:#fff;
-    --text:#0f1b33; --muted:#6b7a90; --line:#e3e9f3;
-    --ok:#12a150; --err:#d93434; --radius:16px;
-    --shopee:#EE4D2D; --tiktok:#000000;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{background:var(--bg)}
-  body{font-family:"Sarabun","Noto Sans Thai",system-ui,-apple-system,sans-serif;color:var(--text);line-height:1.5;min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:32px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Noto Sans Thai",system-ui,sans-serif;color:#1f1f1f;background:#fff;font-size:15px;line-height:1.6}
+  a{color:inherit;text-decoration:none}
   button{font-family:inherit}
-  a{color:inherit}
 
-  /* ---------- Top bar ---------- */
-  .topbar{background:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
-  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-  .logo{width:34px;height:34px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;position:relative}
-  .logo::before{content:"";width:12px;height:16px;background:var(--yellow);border-radius:3px}
-  .brand-name{font-weight:800;color:var(--blue);font-size:17px;line-height:1.1}
-  .brand-sub{font-size:11px;color:var(--muted)}
-  .top-link{font-size:13px;font-weight:700;color:var(--blue);text-decoration:none;background:#eaf2ff;padding:7px 12px;border-radius:999px}
+  /* ---------- หัวเว็บ ---------- */
+  .topbar{height:72px;padding:0 64px;border-bottom:0.5px solid #e4e4e0;display:flex;align-items:center;justify-content:space-between;gap:24px;position:sticky;top:0;background:#fff;z-index:10}
+  .brand{font-size:20px;font-weight:500}
+  .nav{display:flex;gap:32px;font-size:15px;color:#5f5e5a}
+  .nav a:hover{color:#1f1f1f}
+  .admin-link{font-size:14px;color:#5f5e5a}
 
-  /* ---------- Hero ---------- */
-  .hero{background:linear-gradient(115deg,#0a3f9e 0%,#0b5ed7 50%,#1d7cf2 100%);color:#fff;padding:20px 18px 18px;position:relative;overflow:hidden}
-  .hero::before{content:"";position:absolute;right:-90px;top:-70px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),rgba(255,255,255,0) 70%);pointer-events:none}
-  .hero h1{font-size:22px;font-weight:800;line-height:1.3;position:relative;z-index:1}
-  .hero h1 .hl{color:var(--yellow)}
-  .hero p{font-size:13px;opacity:.95;margin-top:6px;position:relative;z-index:1}
-  .perks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative;z-index:1}
-  .perk{font-size:11px;background:rgba(255,255,255,.14);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;line-height:1.35}
-  .perk .pi{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:4px}
-  .perk b{font-size:12px}
+  /* ---------- เนื้อหา ---------- */
+  .wrap{padding:32px 64px;max-width:1280px;margin:0 auto}
+  .narrow{max-width:620px}
+  .crumb{font-size:14px;color:#5f5e5a;margin-bottom:24px}
+  .section-title{font-size:20px;font-weight:500;margin:0 0 20px}
+  .muted{color:#5f5e5a;font-size:14px}
+  .err{color:#a32d2d;font-size:14px;margin:0 0 12px}
 
-  /* ---------- Layout ---------- */
-  main{padding:14px 14px 0}
-  .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 2px 10px rgba(16,40,80,.06);margin-bottom:14px}
-  .card h2{font-size:17px;font-weight:800;margin-bottom:6px}
-  .section{font-size:16px;font-weight:800;margin:18px 2px 10px}
-  .muted{color:var(--muted);font-size:13px}
-  .err{color:var(--err);font-size:13px;margin-top:10px}
-  .step{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px}
-
-  /* ---------- Product grid ---------- */
-  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
-  .pill{font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;text-decoration:none;color:var(--text)}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .pcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-decoration:none;display:block;transition:.15s}
-  .pcard:hover{border-color:var(--blue-l)}
-  .thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#eaf2ff;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+  /* ---------- การ์ดสินค้า ---------- */
+  .pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+  .pill{font-size:14px;padding:6px 14px;border:0.5px solid #b4b2a9;border-radius:999px;color:#1f1f1f}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:24px}
+  .pcard{display:block}
+  .thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#f1efe8;display:flex;align-items:center;justify-content:center;color:#5f5e5a;font-size:14px}
   img.thumb{display:block}
-  .pname{font-size:14px;margin-top:8px;min-height:40px}
-  .price{font-weight:800;color:var(--blue);font-size:16px}
-  .old{text-decoration:line-through;color:#8a96a8;font-size:12px;margin-left:6px}
-  .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fff4d6;color:#8a5b00;margin-left:6px}
-  .stock{font-size:12px;color:var(--ok)}
-  .stock.out{color:var(--err)}
+  .pname{font-size:15px;margin-top:10px;min-height:46px}
+  .price{font-size:16px;font-weight:500;color:#993c1d}
+  .old{font-size:13px;color:#888780;text-decoration:line-through;margin-left:8px}
+  .badge{font-size:12px;background:#faece7;color:#712b13;padding:2px 8px;border-radius:8px;margin-left:8px}
+  .stock{display:inline-block;font-size:13px;color:#27500a;background:#eaf3de;padding:3px 10px;border-radius:8px;margin-top:6px}
+  .stock.out{color:#791f1f;background:#fcebeb}
 
-  /* ---------- Buttons ---------- */
-  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(90deg,var(--blue-d),var(--blue));color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:0 6px 14px rgba(11,94,215,.25);margin-top:10px}
-  .btn:hover{filter:brightness(1.05)}
-  .btn[disabled]{background:#9fb4cf;box-shadow:none;cursor:not-allowed}
-  .btn.shopee{background:var(--shopee);box-shadow:0 6px 14px rgba(238,77,45,.25)}
-  .btn.tiktok{background:var(--tiktok);box-shadow:0 6px 14px rgba(0,0,0,.2)}
-  .btn.ghost{background:#eef3fa;color:var(--text);box-shadow:none}
-  .btn .logo-slot{display:inline-block;min-width:4px}
-  .partner-note{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+  /* ---------- หน้าสินค้า ---------- */
+  .detail{display:flex;gap:64px;align-items:flex-start;flex-wrap:wrap}
+  .detail-img{width:560px;max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#f1efe8}
+  .info{flex:1;min-width:300px;display:flex;flex-direction:column;gap:18px}
+  .info h1{margin:0;font-size:32px;font-weight:500;line-height:1.3}
+  .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .price-big{font-size:36px;font-weight:500;color:#993c1d}
+  .price-old{font-size:18px;color:#888780;text-decoration:line-through}
+  .btns{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:8px;font-size:16px;font-weight:500;border:0;cursor:pointer;width:100%;color:#fff;background:#1f1f1f;text-align:center}
+  .btn:hover{opacity:.92}
+  .btn[disabled]{background:#c9c8c1;cursor:not-allowed}
+  .btn.shopee{background:#EE4D2D}
+  .btn.tiktok{background:#000}
+  .logo-slot{display:inline-block;width:0}
+  .disclosure{margin:0;font-size:12px;color:#888780}
+  .desc{border-top:0.5px solid #e4e4e0;padding-top:20px;font-size:15px;line-height:1.7;color:#444441;white-space:pre-line}
 
-  /* ---------- Forms ---------- */
-  .field-label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}
-  .input input,.input textarea,.field input,.field textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;background:#fbfdff;color:var(--text)}
-  .input input:focus,.input textarea:focus,.field input:focus,.field textarea:focus{outline:2px solid var(--blue-l);border-color:transparent}
-  .radio{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer;background:#fff}
-  .radio:has(input:checked){border-color:var(--blue-l);background:#f7fbff}
-  .radio input{margin-top:4px}
-  .radio b{display:block;font-size:14px}
-  .radio span{font-size:12px;color:var(--muted)}
-
-  /* ---------- Summary ---------- */
-  table{width:100%;border-collapse:collapse;margin-top:6px}
-  td,th{border-bottom:1px solid var(--line);padding:9px 4px;text-align:left;font-size:14px;vertical-align:top}
-  th{font-weight:700}
+  /* ---------- ขั้นตอนสั่งซื้อ ---------- */
+  .step{font-size:13px;color:#5f5e5a;margin-bottom:6px}
+  .field-label{display:block;font-size:14px;font-weight:500;margin:18px 0 8px}
+  .field input,.field textarea{width:100%;padding:12px 14px;border:0.5px solid #b4b2a9;border-radius:8px;font-size:15px;font-family:inherit;background:#fff;color:#1f1f1f}
+  .field input:focus,.field textarea:focus{outline:1.5px solid #1f1f1f;border-color:transparent}
+  .option{display:flex;gap:12px;align-items:flex-start;border:0.5px solid #b4b2a9;border-radius:8px;padding:14px;margin-top:10px;cursor:pointer}
+  .option:has(input:checked){border:1.5px solid #1f1f1f}
+  .option input{margin-top:4px}
+  .option b{display:block;font-weight:500}
+  .option span{font-size:13px;color:#5f5e5a}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  td,th{border-bottom:0.5px solid #e4e4e0;padding:10px 4px;text-align:left;font-size:14px;vertical-align:top}
+  th{font-weight:500}
   .right{text-align:right}
-  .pay{background:#f0f6ff;border-radius:12px;padding:12px 14px;margin:14px 0;font-size:14px;line-height:1.7}
-  .pay strong{color:var(--blue)}
-  .bank{white-space:pre-line;font-size:13px;color:var(--muted);margin-top:8px}
-  .slip-preview{width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
-  .detail-img{width:100%;border-radius:14px;aspect-ratio:1;object-fit:cover;background:#eaf2ff}
-  .detail-price{font-size:26px;font-weight:800;color:var(--blue);margin:10px 0 4px}
-  .desc{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;white-space:pre-line;font-size:14px;line-height:1.7}
+  .box{background:#f7f6f2;border-radius:8px;padding:16px;margin:20px 0;font-size:14px;line-height:1.8}
+  .box strong{font-weight:500;color:#993c1d}
+  .bank{white-space:pre-line;color:#5f5e5a;font-size:13px;margin-top:8px}
+  .slip-preview{width:100%;max-height:260px;object-fit:contain;border-radius:8px;margin-top:12px;border:0.5px solid #e4e4e0}
+  .back-link{display:inline-block;margin-top:20px;font-size:14px;color:#5f5e5a;text-decoration:underline}
+
+  @media (max-width:820px){
+    .topbar{padding:12px 20px;height:auto;flex-wrap:wrap}
+    .nav{display:none}
+    .wrap{padding:24px 20px}
+    .detail-img{width:100%}
+    .info h1{font-size:26px}
+  }
 </style>
 </head>
 <body>
 
 <header class="topbar">
-  <a class="brand" href="#/">
-    <div class="logo"></div>
-    <div>
-      <div class="brand-name">ร้านของฉัน</div>
-      <div class="brand-sub">ขายของออนไลน์</div>
-    </div>
-  </a>
-  <a class="top-link" href="admin.html">หลังบ้าน</a>
+  <a class="brand" href="#/">ร้านของฉัน</a>
+  <nav class="nav">
+    <a href="#/">หน้าแรก</a>
+    <a href="#/">สินค้าทั้งหมด</a>
+    <a href="#/">โปรโมชัน</a>
+    <a href="#/">ติดต่อเรา</a>
+  </nav>
+  <a class="admin-link" href="admin.html">หลังบ้าน</a>
 </header>
 
 <div id="app"></div>
@@ -125,6 +115,7 @@ const HOSTS = {
 const CHANNEL_LABEL = { shopee: 'Shopee', tiktok: 'TikTok' };
 
 let data = load();
+let draft = null; /* ข้อมูลจากขั้นตอนที่ 2 ส่งต่อไปขั้นตอนที่ 3 */
 
 const $app = () => document.getElementById('app');
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -140,7 +131,7 @@ function seed() {
       { id: 3, name: 'น้ำหอม', slug: 'perfume' },
     ],
     products: [
-      { id: 1, name: 'เสื้อยืดคอกลม ผ้าฝ้าย', slug: 'cotton-tee', categoryId: 1, description: 'ผ้าฝ้ายนุ่ม ระบายอากาศดี', price: 199, shipping: SHIPPING_DEFAULT, onHand: 20, reserved: 0, image: '', discount: { kind: 'percent', value: 20 }, links: {} },
+      { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 12, reserved: 0, image: '', discount: { kind: 'fixed', value: 300 }, links: {} },
       { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
       { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
     ],
@@ -155,7 +146,6 @@ function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
 
 /* ---------- ราคาและสต๊อก ---------- */
 function priceOf(p) {
-  const now = nowBkk();
   let price = p.price;
   const d = p.discount;
   if (d) {
@@ -167,15 +157,14 @@ function priceOf(p) {
 }
 const available = (p) => Math.max(0, p.onHand - p.reserved);
 const catById = (id) => data.categories.find((c) => c.id === id);
-const published = () => data.products;
 const productBySlug = (slug) => data.products.find((p) => p.slug === slug);
-const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => p.links[ch] && allowedLink(ch, p.links[ch]));
 function allowedLink(ch, raw) {
   let u;
   try { u = new URL(raw); } catch { return false; }
   if (u.protocol !== 'https:') return false;
   return HOSTS[ch].some((h) => u.hostname === h || u.hostname.endsWith('.' + h));
 }
+const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => p.links[ch] && allowedLink(ch, p.links[ch]));
 
 /* ---------- ชิ้นส่วนแสดงผล ---------- */
 function priceHtml(p) {
@@ -186,26 +175,17 @@ function priceHtml(p) {
 const stockHtml = (p) => available(p) > 0
   ? `<span class="stock">คงเหลือในร้าน ${available(p)} ชิ้น</span>`
   : `<span class="stock out">สินค้าหมดในร้าน</span>`;
-const thumb = (p) => p.image ? `<img class="thumb" src="${esc(p.image)}" alt="">` : `<div class="thumb">ยังไม่มีรูป</div>`;
-function stepBar(n) { return `<div class="step">ขั้นตอนที่ ${n} จาก 3</div>`; }
+const thumb = (p) => p.image ? `<img class="thumb" src="${esc(p.image)}" alt="">` : `<div class="thumb">ยังไม่มีรูปสินค้า</div>`;
+const stepLabel = (n) => `<div class="step">ขั้นตอนที่ ${n} จาก 3</div>`;
 
 /* ---------- หน้าต่างๆ ---------- */
 function pageHome() {
   const pills = data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('');
-  return `<div class="hero">
-      <h1>สินค้าคัดสรร <span class="hl">ราคาดีทุกวัน</span></h1>
-      <p>สั่งที่ร้านหรือซื้อผ่านแพลตฟอร์มก็ได้</p>
-      <div class="perks">
-        <div class="perk"><div class="pi">✓</div><b>ของแท้</b>คัดจากแบรนด์</div>
-        <div class="perk"><div class="pi">🚚</div><b>ส่งไว</b>ส่งทุกวัน</div>
-        <div class="perk"><div class="pi">฿</div><b>เก็บเงินปลายทาง</b>ได้</div>
-      </div>
-    </div>
-    <main>
-      <div class="pills">${pills}</div>
-      <div class="section">สินค้าทั้งหมด</div>
-      ${grid(published())}
-    </main>`;
+  return `<div class="wrap">
+    <div class="pills">${pills}</div>
+    <h2 class="section-title">สินค้าทั้งหมด</h2>
+    ${grid(data.products)}
+  </div>`;
 }
 function grid(list) {
   if (!list.length) return '<p class="muted">ยังไม่มีสินค้าให้แสดง</p>';
@@ -215,97 +195,109 @@ function grid(list) {
 function pageCategory(slug) {
   const cat = data.categories.find((c) => c.slug === slug);
   if (!cat) return pageNotFound();
-  return `<main><div class="section">${esc(cat.name)}</div>${grid(published().filter((p) => p.categoryId === cat.id))}
-    <p style="margin-top:14px"><a href="#/">← กลับหน้าแรก</a></p></main>`;
+  return `<div class="wrap">
+    <div class="pills">${data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('')}</div>
+    <h2 class="section-title">${esc(cat.name)}</h2>
+    ${grid(data.products.filter((p) => p.categoryId === cat.id))}
+  </div>`;
 }
 function pageProduct(slug) {
   const p = productBySlug(slug);
   if (!p) return pageNotFound();
-  const av = available(p);
   const pr = priceOf(p);
-  const ext = extChannels(p);
   const cat = catById(p.categoryId);
-  const storeBtn = av > 0
+  const ext = extChannels(p);
+  const storeBtn = available(p) > 0
     ? `<a class="btn" href="#/p/${esc(p.slug)}/checkout">สั่งซื้อสินค้าราคา ${baht(pr.price)}</a>`
     : `<button class="btn" disabled>สินค้าหมดในร้าน</button>`;
   const extBtns = ext.map((ch) => `<a class="btn ${ch}" href="${esc(p.links[ch])}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')"><span class="logo-slot"></span>สั่งซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
-  const note = ext.length ? '<div class="partner-note">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</div>' : '';
-  return `<main>
-    <div class="card">
-      ${p.image ? `<img class="detail-img" src="${esc(p.image)}" alt="">` : `<div class="thumb" style="aspect-ratio:1;border-radius:14px">ยังไม่มีรูปสินค้า</div>`}
-      <h2 style="margin-top:14px">${esc(p.name)}</h2>
-      ${cat ? `<div class="muted">หมวด ${esc(cat.name)}</div>` : ''}
-      <div class="detail-price">${baht(pr.price)}${pr.discounted ? `<span class="old">${baht(pr.original)}</span>` : ''}</div>
-      <div>${stockHtml(p)}</div>
-      ${storeBtn}
-      ${extBtns}
-      ${note}
-      <div class="desc">${esc(p.description)}</div>
+  const disclosure = ext.length ? '<p class="disclosure">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</p>' : '';
+  return `<div class="wrap">
+    <div class="crumb">หน้าแรก${cat ? ' / ' + esc(cat.name) : ''} / ${esc(p.name)}</div>
+    <div class="detail">
+      ${p.image ? `<img class="detail-img" src="${esc(p.image)}" alt="">` : `<div class="detail-img thumb">รูปสินค้าจากหลังบ้าน</div>`}
+      <div class="info">
+        <div>
+          <h1>${esc(p.name)}</h1>
+          ${cat ? `<p class="muted" style="margin:8px 0 0">หมวด ${esc(cat.name)}</p>` : ''}
+        </div>
+        <div class="price-row">
+          <span class="price-big">${baht(pr.price)}</span>
+          ${pr.discounted ? `<span class="price-old">${baht(pr.original)}</span><span class="badge">ลด ${pr.pct}%</span>` : ''}
+        </div>
+        <div>${stockHtml(p)}</div>
+        <div class="btns">
+          ${storeBtn}
+          ${extBtns}
+          ${disclosure}
+        </div>
+        <div class="desc">${esc(p.description)}</div>
+      </div>
     </div>
-  </main>`;
+  </div>`;
 }
 
 /* ขั้นตอนที่ 2: ข้อมูลผู้รับและวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
-function pageCheckout(slug, draft, error = '') {
+function pageCheckout(slug, d, error = '') {
   const p = productBySlug(slug);
   if (!p) return pageNotFound();
   if (available(p) < 1) { location.hash = '#/p/' + slug; return ''; }
-  const d = draft || { qty: 1, name: '', phone: '', address: '', note: '', method: 'transfer' };
-  return `<main><div class="card">
-    ${stepBar(2)}
-    <h2>${esc(p.name)}</h2>
-    <div class="muted">${baht(priceOf(p).price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping)}</div>
-    ${error ? `<div class="err">${esc(error)}</div>` : ''}
+  const v = d || { qty: 1, name: '', phone: '', address: '', note: '', method: 'transfer' };
+  return `<div class="wrap narrow">
+    ${stepLabel(2)}
+    <h2 class="section-title" style="margin-bottom:4px">${esc(p.name)}</h2>
+    <p class="muted" style="margin:0 0 12px">${baht(priceOf(p).price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping)}</p>
+    ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form onsubmit="goStep3(event,'${esc(p.slug)}')">
       <label class="field-label">จำนวน (คงเหลือ ${available(p)} ชิ้น)</label>
-      <div class="field"><input name="qty" type="number" min="1" max="${Math.min(50, available(p))}" value="${d.qty}" required></div>
+      <div class="field"><input name="qty" type="number" min="1" max="${Math.min(50, available(p))}" value="${v.qty}" required></div>
       <label class="field-label">ชื่อผู้รับ</label>
-      <div class="field"><input name="customer_name" value="${esc(d.name)}" required></div>
+      <div class="field"><input name="customer_name" value="${esc(v.name)}" required></div>
       <label class="field-label">เบอร์โทร</label>
-      <div class="field"><input name="phone" value="${esc(d.phone)}" required></div>
+      <div class="field"><input name="phone" value="${esc(v.phone)}" required></div>
       <label class="field-label">ที่อยู่จัดส่ง</label>
-      <div class="field"><textarea name="address" rows="3" required>${esc(d.address)}</textarea></div>
+      <div class="field"><textarea name="address" rows="3" required>${esc(v.address)}</textarea></div>
       <label class="field-label">หมายเหตุ</label>
-      <div class="field"><textarea name="note" rows="2">${esc(d.note)}</textarea></div>
+      <div class="field"><textarea name="note" rows="2">${esc(v.note)}</textarea></div>
       <label class="field-label">วิธีชำระเงิน</label>
-      <label class="radio"><input type="radio" name="payment_method" value="transfer" ${d.method === 'transfer' ? 'checked' : ''}>
+      <label class="option"><input type="radio" name="payment_method" value="transfer" ${v.method === 'transfer' ? 'checked' : ''}>
         <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า + ค่าจัดส่ง</span></div></label>
-      <label class="radio"><input type="radio" name="payment_method" value="cod" ${d.method === 'cod' ? 'checked' : ''}>
+      <label class="option"><input type="radio" name="payment_method" value="cod" ${v.method === 'cod' ? 'checked' : ''}>
         <div><b>เก็บเงินปลายทาง</b><span>โอนค่าจัดส่ง ${baht(p.shipping)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
-      <button class="btn" type="submit">สั่งซื้อสินค้า</button>
+      <button class="btn" type="submit" style="margin-top:24px">สั่งซื้อสินค้า</button>
     </form>
-  </div></main>`;
+  </div>`;
 }
 
 /* ขั้นตอนที่ 3: สรุปยอด แนบสลิป และยืนยันในหน้าเดียว */
-function pageConfirm(slug, draft) {
+function pageConfirm(slug, d) {
   const p = productBySlug(slug);
-  if (!p || !draft) return pageNotFound();
-  const subtotal = priceOf(p).price * draft.qty;
+  if (!p || !d) return pageNotFound();
+  const subtotal = priceOf(p).price * d.qty;
   const total = subtotal + p.shipping;
-  const cod = draft.method === 'cod';
+  const cod = d.method === 'cod';
   const dueNow = cod ? p.shipping : total;
   const onDelivery = cod ? subtotal : 0;
   const payLines = cod
     ? `<div>ชำระตอนนี้ (ค่าจัดส่ง) <strong>${baht(dueNow)}</strong></div><div>ชำระตอนรับของ (ค่าสินค้า) <strong>${baht(onDelivery)}</strong></div>`
     : `<div>ชำระตอนนี้ <strong>${baht(dueNow)}</strong></div>`;
-  return `<main><div class="card">
-    ${stepBar(3)}
-    <h2>ยืนยันการสั่งซื้อ</h2>
+  return `<div class="wrap narrow">
+    ${stepLabel(3)}
+    <h2 class="section-title">ยืนยันการสั่งซื้อ</h2>
     <table>
       <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
-      <tr><td>${esc(p.name)}</td><td class="right">${draft.qty}</td><td class="right">${baht(subtotal)}</td></tr>
+      <tr><td>${esc(p.name)}</td><td class="right">${d.qty}</td><td class="right">${baht(subtotal)}</td></tr>
       <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(p.shipping)}</td></tr>
       <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(total)}</th></tr>
     </table>
-    <div class="pay">${payLines}<div class="bank">${esc(data.bank)}</div></div>
+    <div class="box">${payLines}<div class="bank">${esc(data.bank)}</div></div>
     <form onsubmit="confirmOrder(event,'${esc(p.slug)}')">
       <label class="field-label">แนบสลิปการโอน (JPG, PNG หรือ WEBP ไม่เกิน 2 MB)</label>
       <div class="field"><input type="file" name="slip" accept="image/jpeg,image/png,image/webp" required onchange="previewSlip(this)"></div>
       <img id="slipPreview" class="slip-preview" style="display:none" alt="">
-      <button class="btn" type="submit">ยืนยันการสั่งซื้อ</button>
+      <button class="btn" type="submit" style="margin-top:24px">ยืนยันการสั่งซื้อ</button>
     </form>
-  </div></main>`;
+  </div>`;
 }
 
 function pageOrder(id) {
@@ -313,30 +305,28 @@ function pageOrder(id) {
   if (!o) return pageNotFound();
   const statusText = { pending: 'รอการตรวจสอบการชำระเงิน', paid: 'ชำระเงินแล้ว', cancelled: 'ยกเลิกแล้ว' };
   const cod = o.payment === 'cod';
-  return `<main><div class="card">
-    <h2>คำสั่งซื้อ #${o.id}</h2>
-    <div class="muted">สถานะ: ${statusText[o.status]} · ${cod ? 'เก็บเงินปลายทาง' : 'โอนชำระเต็มจำนวน'}</div>
+  return `<div class="wrap narrow">
+    <h2 class="section-title">คำสั่งซื้อ #${o.id}</h2>
+    <p class="muted" style="margin-top:-12px">สถานะ: ${statusText[o.status]} · ${cod ? 'เก็บเงินปลายทาง' : 'โอนชำระเต็มจำนวน'}</p>
     <table>
       <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
       ${o.items.map((i) => `<tr><td>${esc(i.name)}</td><td class="right">${i.qty}</td><td class="right">${baht(i.unitPrice * i.qty)}</td></tr>`).join('')}
       <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(o.shipping)}</td></tr>
       <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(o.total)}</th></tr>
     </table>
-    ${o.status === 'pending' ? `<div class="pay">${cod
+    ${o.status === 'pending' ? `<div class="box">${cod
       ? `โอนค่าจัดส่ง <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง เมื่อได้รับสินค้าให้ชำระค่าสินค้า <strong>${baht(o.onDelivery)}</strong> กับพนักงานส่ง`
       : `โอนเงิน <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง`}
       <div>ทีมงานจะตรวจสลิปและยืนยันคำสั่งซื้อให้</div>
       <div class="bank">${esc(data.bank)}</div></div>` : ''}
-    <p style="margin-top:12px"><a href="#/">← กลับหน้าแรก</a></p>
-  </div></main>`;
+    <a class="back-link" href="#/">กลับหน้าแรก</a>
+  </div>`;
 }
 function pageNotFound() {
-  return `<main><div class="card"><h2>ไม่พบหน้าที่ต้องการ</h2><p style="margin-top:10px"><a href="#/">← กลับหน้าแรก</a></p></div></main>`;
+  return `<div class="wrap"><h2 class="section-title">ไม่พบหน้าที่ต้องการ</h2><a class="back-link" href="#/">กลับหน้าแรก</a></div>`;
 }
 
 /* ---------- การทำงานของฟอร์ม ---------- */
-let draft = null; /* ข้อมูลจากขั้นตอนที่ 2 ส่งต่อไปขั้นตอนที่ 3 */
-
 function goStep3(e, slug) {
   e.preventDefault();
   const f = new FormData(e.target);
@@ -368,8 +358,7 @@ function previewSlip(input) {
   const img = document.getElementById('slipPreview');
   const file = input.files && input.files[0];
   if (!file) { img.style.display = 'none'; return; }
-  const url = URL.createObjectURL(file);
-  img.src = url;
+  img.src = URL.createObjectURL(file);
   img.style.display = 'block';
 }
 
@@ -426,7 +415,6 @@ async function confirmOrder(e, slug) {
 }
 
 function trackClick(id, ch) {
-  /* ใช้ตอนเชื่อมระบบจริง ตอนนี้แค่บันทึกไว้ในเบราว์เซอร์ */
   const p = data.products.find((x) => x.id === id);
   if (p) { p.clicks = p.clicks || {}; p.clicks[ch] = (p.clicks[ch] || 0) + 1; save(); }
 }
