@@ -409,11 +409,11 @@ function pagePay(slug, d, error = '') {
     <form id="payForm" onsubmit="submitPay(event,'${sp}')">
       <label class="field-label">วิธีชำระเงิน</label>
       <label class="option"><input type="radio" name="payment_method" value="transfer" onchange="refreshPay('${sp}')" ${method === 'transfer' ? 'checked' : ''}>
-        <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า · จัดส่งฟรี</span></div></label>
+        <div><b>โอนชำระเต็มจำนวน</b><span>ชำระค่าสินค้า</span></div></label>
       <label class="option"><input type="radio" name="payment_method" value="cod" onchange="refreshPay('${sp}')" ${method === 'cod' ? 'checked' : ''}>
-        <div><b>เก็บเงินปลายทาง</b><span>ลูกค้าออกค่า COD เอง โอนค่าจัดส่งและค่า COD ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
+        <div><b>เก็บเงินปลายทาง</b></div></label>
+      <div class="warn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">สั่งซื้อแบบเก็บเงินปลายทางจะมีค่าบริการ COD ที่ลูกค้าต้องชำระก่อน เพื่อป้องกันลูกค้าสั่งซื้อแล้วไม่รับสินค้า</div>
       <div id="summary">${summaryHtml(p, vr, d.qty, method)}</div>
-      <div class="warn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">เก็บเงินปลายทางต้องโอนค่าจัดส่งและค่า COD ล่วงหน้า (ค่า COD ทางร้านกำหนดไว้ในระบบหลังบ้าน) เพื่อป้องกันการสั่งซื้อแล้วไม่รับสินค้า หากรับสินค้าแล้วไม่รับ ค่าจัดส่งและค่า COD ที่ชำระล่วงหน้าจะไม่คืนให้</div>
       <div class="box">
         <div>โอนเข้าบัญชีด้านล่าง แล้วแนบสลิป</div>
         <div class="bank">${esc(data.bank)}</div>
