@@ -164,7 +164,7 @@ function allowedLink(ch, raw) {
   if (u.protocol !== 'https:') return false;
   return HOSTS[ch].some((h) => u.hostname === h || u.hostname.endsWith('.' + h));
 }
-const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => p.links[ch] && allowedLink(ch, p.links[ch]));
+const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => !p.links[ch] || allowedLink(ch, p.links[ch]));
 
 /* ---------- ชิ้นส่วนแสดงผล ---------- */
 function priceHtml(p) {
@@ -210,7 +210,7 @@ function pageProduct(slug) {
   const storeBtn = available(p) > 0
     ? `<a class="btn" href="#/p/${esc(p.slug)}/checkout">สั่งซื้อสินค้าราคา ${baht(pr.price)}</a>`
     : `<button class="btn" disabled>สินค้าหมดในร้าน</button>`;
-  const extBtns = ext.map((ch) => `<a class="btn ${ch}" href="${esc(p.links[ch])}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')"><span class="logo-slot"></span>สั่งซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
+  const extBtns = ext.map((ch) => `<a class="btn ${ch}" href="${esc(p.links[ch] || '#')}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')"><span class="logo-slot"></span>สั่งซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
   const disclosure = ext.length ? '<p class="disclosure">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</p>' : '';
   return `<div class="wrap">
     <div class="crumb">หน้าแรก${cat ? ' / ' + esc(cat.name) : ''} / ${esc(p.name)}</div>
