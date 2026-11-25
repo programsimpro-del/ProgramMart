@@ -121,6 +121,7 @@
 .step-img.thumb{height:min(100vw,80vh);aspect-ratio:auto}
 #stockLabel{display:block;text-align:center}
 .qty-row{justify-content:center}
+.warn{background:#faeeda;color:#633806;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -143,7 +144,12 @@
  * หน้าร้าน (เวอร์ชันตัวอย่าง): ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น
  * ลิงก์ Shopee / TikTok ในข้อมูลตัวอย่างเป็นค่าว่าง จึงยังไม่แสดงปุ่ม ให้ใส่ลิงก์พันธมิตรจริงในหลังบ้าน
  */
-const KEY = 'shop-front-v3';
+const KEY = 'shop-front-v4';
+/* รูปตัวอย่างแบบวาดง่ายๆ ใช้แทนรูปจริงจนกว่าจะอัปโหลดจากหลังบ้าน */
+function sampleBag(color) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect width="400" height="400" fill="#f1efe8"/><path d="M150 150 C150 80 250 80 250 150" fill="none" stroke="#5f5e5a" stroke-width="12"/><rect x="100" y="150" width="200" height="180" rx="10" fill="' + color + '"/></svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
 const SHIPPING_DEFAULT = 40;
 const HOSTS = {
   shopee: ['shopee.co.th', 's.shopee.co.th', 'shope.ee'],
@@ -172,16 +178,17 @@ function seed() {
       { id: 3, name: 'น้ำหอม', slug: 'perfume' },
     ],
     products: [
-      { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 0, reserved: 0, image: '', discount: { kind: 'fixed', value: 300 }, links: {}, variants: [
-        { id: 'black', name: 'สีดำ', image: '', price: 1290, onHand: 6, reserved: 0 },
-        { id: 'brown', name: 'สีน้ำตาล', image: '', price: 1290, onHand: 6, reserved: 0 },
-        { id: 'white', name: 'สีขาว', image: '', price: 1290, onHand: 6, reserved: 0 },
-        { id: 'navy', name: 'สีกรมท่า', image: '', price: 1290, onHand: 6, reserved: 0 },
-        { id: 'green', name: 'สีเขียว', image: '', price: 1290, onHand: 6, reserved: 0 },
+      { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 0, reserved: 0, image: sampleBag('#d8c9a8'), discount: { kind: 'fixed', value: 300 }, links: {}, variants: [
+        { id: 'black', name: 'สีดำ', image: sampleBag('#2c2c2a'), price: 1290, onHand: 6, reserved: 0 },
+        { id: 'brown', name: 'สีน้ำตาล', image: sampleBag('#8b5e3c'), price: 1290, onHand: 6, reserved: 0 },
+        { id: 'white', name: 'สีขาว', image: sampleBag('#f5f5f0'), price: 1290, onHand: 6, reserved: 0 },
+        { id: 'navy', name: 'สีกรมท่า', image: sampleBag('#1f3a5f'), price: 1290, onHand: 6, reserved: 0 },
+        { id: 'green', name: 'สีเขียว', image: sampleBag('#3b6d11'), price: 1290, onHand: 6, reserved: 0 },
       ] },
-      { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
-      { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
+      { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: sampleBag('#e8c7a0'), discount: null, links: {} },
+      { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: sampleBag('#c9b8d9'), discount: null, links: {} },
     ],
+    codFee: 0,
     orders: [],
     nextOrderId: 1,
   };
@@ -206,6 +213,8 @@ function priceFor(p, vr) {
 function priceOf(p) { return priceFor(p, null); }
 /* ค่าจัดส่งเก็บเฉพาะเก็บเงินปลายทาง ถ้าโอนเต็มจำนวนจัดส่งฟรี */
 function shippingFor(p, method) { return method === 'cod' ? p.shipping : 0; }
+/* ค่า COD กำหนดในหลังบ้าน ลูกค้าชำระล่วงหน้าพร้อมค่าจัดส่ง */
+function codFeeFor(method) { return method === 'cod' ? (data.codFee || 0) : 0; }
 const variantAvail = (v) => Math.max(0, v.onHand - v.reserved);
 const hasVariants = (p) => Array.isArray(p.variants) && p.variants.length > 0;
 const available = (p) => hasVariants(p)
@@ -301,8 +310,9 @@ function summaryFor(p, vr, qty, method) {
   const discount = listTotal - subtotal;
   const cod = method === 'cod';
   const shipping = method ? shippingFor(p, method) : 0;
-  const total = subtotal + shipping;
-  return { pr, listTotal, discount, subtotal, shipping, total, cod, dueNow: cod ? shipping : total, onDelivery: cod ? subtotal : 0 };
+  const codFee = codFeeFor(method);
+  const total = subtotal + shipping + codFee;
+  return { pr, listTotal, discount, subtotal, shipping, codFee, total, cod, dueNow: cod ? shipping + codFee : total, onDelivery: cod ? subtotal : 0 };
 }
 function summaryHtml(p, vr, qty, method) {
   const s = summaryFor(p, vr, qty, method);
@@ -311,6 +321,7 @@ function summaryHtml(p, vr, qty, method) {
     <div class="srow"><span>ราคาสินค้า ${qty} ชิ้น</span><span>${baht(s.listTotal)}</span></div>
     ${s.discount > 0 ? `<div class="srow disc"><span>ส่วนลด${s.pr.pct ? ' ' + s.pr.pct + '%' : ''}</span><span>-${baht(s.discount)}</span></div>` : ''}
     ${s.cod ? `<div class="srow"><span>ค่าจัดส่ง</span><span>${baht(s.shipping)}</span></div>` : ''}
+    ${s.cod && s.codFee ? `<div class="srow"><span>ค่าบริการ COD</span><span>${baht(s.codFee)}</span></div>` : ''}
     <div class="srow total"><span>รวมทั้งสิ้น</span><span>${baht(s.total)}</span></div>
     ${payMode ? `<div class="srow pay"><span>${s.cod ? 'ชำระตอนนี้ (ค่าจัดส่ง)' : 'ชำระตอนนี้'}</span><span>${baht(s.dueNow)}</span></div>` : ''}
     ${payMode && s.cod ? `<div class="srow pay"><span>ชำระตอนรับของ (ค่าสินค้า)</span><span>${baht(s.onDelivery)}</span></div>` : ''}
@@ -355,7 +366,6 @@ function pageCheckout(slug, d, error = '') {
   const many = hasVariants(p) && p.variants.length > 2;
   const variantsHtml = hasVariants(p) ? `<label class="field-label">เลือกตัวเลือกสินค้า</label>
       <div class="variant-wrap${many ? ' slider' : ''}">
-        ${many ? '<button type="button" class="vnav" onclick="scrollVariants(-1)" aria-label="ดูตัวเลือกก่อนหน้า">‹</button>' : ''}
         <div class="variants" id="variantsRow">${p.variants.map((x) => {
           const n = variantAvail(x);
           return `<label class="variant ${n < 1 ? 'off' : ''}">
@@ -364,7 +374,6 @@ function pageCheckout(slug, d, error = '') {
             <span><b>${esc(x.name)}</b><small class="vprice">${baht(priceFor(p, x).price)}</small><small>${n > 0 ? 'เหลือ ' + n + ' ชิ้น' : 'หมดแล้ว'}</small></span>
           </label>`;
         }).join('')}</div>
-        ${many ? '<button type="button" class="vnav" onclick="scrollVariants(1)" aria-label="ดูตัวเลือกถัดไป">›</button>' : ''}
       </div>` : '';
   return `<div class="wrap narrow">
     ${p.image ? `<img class="step-img" src="${esc(p.image)}" alt="">` : '<div class="step-img thumb">รูปสินค้าจากหลังบ้าน</div>'}
@@ -400,8 +409,9 @@ function pagePay(slug, d, error = '') {
       <label class="option"><input type="radio" name="payment_method" value="transfer" onchange="refreshPay('${sp}')" ${method === 'transfer' ? 'checked' : ''}>
         <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า · จัดส่งฟรี</span></div></label>
       <label class="option"><input type="radio" name="payment_method" value="cod" onchange="refreshPay('${sp}')" ${method === 'cod' ? 'checked' : ''}>
-        <div><b>เก็บเงินปลายทาง</b><span>โอนค่าจัดส่ง ${baht(p.shipping)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
+        <div><b>เก็บเงินปลายทาง</b><span>ลูกค้าออกค่า COD เอง โอนค่าจัดส่งและค่า COD ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
       <div id="summary">${summaryHtml(p, vr, d.qty, method)}</div>
+      <div class="warn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">เก็บเงินปลายทางต้องโอนค่าจัดส่งและค่า COD ล่วงหน้า (ค่า COD ทางร้านกำหนดไว้ในระบบหลังบ้าน) เพื่อป้องกันการสั่งซื้อแล้วไม่รับสินค้า หากรับสินค้าแล้วไม่รับ ค่าจัดส่งและค่า COD ที่ชำระล่วงหน้าจะไม่คืนให้</div>
       <div class="box">
         <div>โอนเข้าบัญชีด้านล่าง แล้วแนบสลิป</div>
         <div class="bank">${esc(data.bank)}</div>
@@ -450,6 +460,7 @@ function pageOrder(id) {
       <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
       ${o.items.map((i) => `<tr><td>${esc(i.name)}</td><td class="right">${i.qty}</td><td class="right">${baht(i.unitPrice * i.qty)}</td></tr>`).join('')}
       ${cod ? `<tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(o.shipping)}</td></tr>` : ''}
+      ${cod && o.codFee ? `<tr><td colspan="2">ค่าบริการ COD</td><td class="right">${baht(o.codFee)}</td></tr>` : ''}
       <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(o.total)}</th></tr>
     </table>
     ${o.tracking ? `<div class="box">เลขพัสดุ <strong>${esc(o.tracking)}</strong></div>` : ''}
@@ -490,11 +501,17 @@ function pageAdmin() {
   return `<div class="wrap">
     <h2 class="section-title">หลังบ้าน: คำสั่งซื้อ</h2>
     <div class="notice">รอตรวจสลิป ${waitSlip} รายการ · รอจัดส่ง ${waitShip} รายการ</div>
+    <div class="admin-card"><label class="field-label" style="margin:0">ค่า COD (บาท) ที่ลูกค้าต้องออกเองตอนเก็บเงินปลายทาง</label>
+      <div class="admin-actions"><input class="trk" id="codFeeInput" type="number" min="0" value="${data.codFee || 0}" style="width:120px"><button class="btn btn-sm" onclick="saveCodFee()">บันทึก</button></div></div>
     ${rows || '<p class="muted">ยังไม่มีคำสั่งซื้อ</p>'}
   </div>`;
 }
 
 /* ---------- การทำงานของฟอร์ม ---------- */
+function saveCodFee() {
+  const v = Math.max(0, Math.round(Number(document.getElementById('codFeeInput').value) || 0));
+  data.codFee = v; save(); render();
+}
 function useMyLocation() {
   const st = document.getElementById('locStatus');
   const ta = document.querySelector('textarea[name="address"]');
@@ -542,6 +559,7 @@ function refreshPay(slug) {
   const method = form.elements.payment_method.value === 'cod' ? 'cod' : 'transfer';
   setDraft({ ...draft, method });
   document.getElementById('summary').innerHTML = summaryHtml(p, vr, draft.qty, method);
+  document.getElementById('codWarn').style.display = method === 'cod' ? 'block' : 'none';
 }
 
 function previewSlip(input) {
@@ -604,16 +622,18 @@ function submitAddress(e, slug) {
   const subtotal = unit * d.qty;
   const cod = d.method === 'cod';
   const shipping = shippingFor(p, d.method);
-  const total = subtotal + shipping;
+  const codFee = codFeeFor(d.method);
+  const total = subtotal + shipping + codFee;
   if (vr) vr.reserved += d.qty; else p.reserved += d.qty;
   const order = {
     id: data.nextOrderId++,
     name: d.name, phone: d.phone, address: d.address, note: d.note,
     items: [{ productId: p.id, variantId: vr ? vr.id : null, name: vr ? `${p.name} (${vr.name})` : p.name, qty: d.qty, unitPrice: unit }],
     shipping,
+    codFee,
     total,
     payment: d.method,
-    dueNow: cod ? shipping : total,
+    dueNow: cod ? shipping + codFee : total,
     onDelivery: cod ? subtotal : 0,
     slip: d.slip,
     status: 'pending',
