@@ -1,104 +1,164 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>หน้าร้าน (ตัวอย่างระบบ)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ร้านของฉัน</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,"Noto Sans Thai",sans-serif;color:#1f1f1f;background:#fff;font-size:15px}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:1px solid #e4e4e0}
-header a{color:inherit;text-decoration:none}
-.logo{font-size:20px;font-weight:600}
-nav a{margin-left:18px;font-size:14px;color:#5f5e5a}
-main{max-width:1100px;margin:0 auto;padding:24px}
-h1{font-size:24px;font-weight:500;margin:0 0 12px}
-h2{font-size:18px;font-weight:500;margin:28px 0 12px}
-.muted{color:#5f5e5a;font-size:14px}
-.err{color:#a32d2d}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
-.card{border:1px solid #e4e4e0;border-radius:12px;padding:12px;color:inherit;text-decoration:none;display:block}
-.thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:#f1efe8;display:flex;align-items:center;justify-content:center;color:#888;font-size:13px}
-img.thumb{display:block}
-.price{font-weight:600}.old{text-decoration:line-through;color:#888;margin-left:6px}
-.badge{font-size:12px;padding:2px 8px;border-radius:6px;background:#faece7;color:#712b13;margin-left:6px}
-.stock{font-size:13px;color:#27500a}.out{color:#a32d2d}
-.btn{display:inline-block;padding:10px 16px;border-radius:8px;border:1px solid #1f1f1f;background:#1f1f1f;color:#fff;text-decoration:none;cursor:pointer;font-size:15px;text-align:center;font-family:inherit}
-.btn.alt{background:#fff;color:#1f1f1f;border-color:#b4b2a9}
-.btn.small{padding:5px 10px;font-size:13px}
-.btn[disabled]{opacity:.4;cursor:not-allowed}
-.btn.block{display:block;width:100%;margin-top:8px}
-label{display:block;margin:10px 0 4px;font-size:14px}
-input,select,textarea{width:100%;padding:8px;border:1px solid #b4b2a9;border-radius:6px;font-size:15px;font-family:inherit}
-input[type=checkbox]{width:auto}
-table{width:100%;border-collapse:collapse}
-td,th{border-bottom:1px solid #e4e4e0;padding:8px;text-align:left;font-size:14px;vertical-align:top}
-.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:160px}
-.pill{display:inline-block;padding:4px 12px;border:1px solid #e4e4e0;border-radius:999px;margin:4px;color:inherit;text-decoration:none;font-size:14px}
-.flex{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.stat{border:1px solid #e4e4e0;border-radius:12px;padding:12px 16px;min-width:150px}
-.stat b{display:block;font-size:22px;font-weight:500;margin-top:4px}
-.box{border:1px solid #e4e4e0;border-radius:12px;padding:16px;margin-top:20px;white-space:pre-line}
-.detail{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
-.detail>div{flex:1;min-width:280px}
+  :root{
+    --blue:#0b5ed7; --blue-d:#084bb0; --blue-l:#2f8cff;
+    --yellow:#ffc233; --bg:#f3f6fb; --card:#fff;
+    --text:#0f1b33; --muted:#6b7a90; --line:#e3e9f3;
+    --ok:#12a150; --err:#d93434; --radius:16px;
+    --shopee:#EE4D2D; --tiktok:#000000;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg)}
+  body{font-family:"Sarabun","Noto Sans Thai",system-ui,-apple-system,sans-serif;color:var(--text);line-height:1.5;min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:32px}
+  button{font-family:inherit}
+  a{color:inherit}
+
+  /* ---------- Top bar ---------- */
+  .topbar{background:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo{width:34px;height:34px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;position:relative}
+  .logo::before{content:"";width:12px;height:16px;background:var(--yellow);border-radius:3px}
+  .brand-name{font-weight:800;color:var(--blue);font-size:17px;line-height:1.1}
+  .brand-sub{font-size:11px;color:var(--muted)}
+  .top-link{font-size:13px;font-weight:700;color:var(--blue);text-decoration:none;background:#eaf2ff;padding:7px 12px;border-radius:999px}
+
+  /* ---------- Hero ---------- */
+  .hero{background:linear-gradient(115deg,#0a3f9e 0%,#0b5ed7 50%,#1d7cf2 100%);color:#fff;padding:20px 18px 18px;position:relative;overflow:hidden}
+  .hero::before{content:"";position:absolute;right:-90px;top:-70px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.25),rgba(255,255,255,0) 70%);pointer-events:none}
+  .hero h1{font-size:22px;font-weight:800;line-height:1.3;position:relative;z-index:1}
+  .hero h1 .hl{color:var(--yellow)}
+  .hero p{font-size:13px;opacity:.95;margin-top:6px;position:relative;z-index:1}
+  .perks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;position:relative;z-index:1}
+  .perk{font-size:11px;background:rgba(255,255,255,.14);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;line-height:1.35}
+  .perk .pi{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:4px}
+  .perk b{font-size:12px}
+
+  /* ---------- Layout ---------- */
+  main{padding:14px 14px 0}
+  .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 2px 10px rgba(16,40,80,.06);margin-bottom:14px}
+  .card h2{font-size:17px;font-weight:800;margin-bottom:6px}
+  .section{font-size:16px;font-weight:800;margin:18px 2px 10px}
+  .muted{color:var(--muted);font-size:13px}
+  .err{color:var(--err);font-size:13px;margin-top:10px}
+  .step{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px}
+
+  /* ---------- Product grid ---------- */
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+  .pill{font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:#fff;text-decoration:none;color:var(--text)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .pcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;text-decoration:none;display:block;transition:.15s}
+  .pcard:hover{border-color:var(--blue-l)}
+  .thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:#eaf2ff;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+  img.thumb{display:block}
+  .pname{font-size:14px;margin-top:8px;min-height:40px}
+  .price{font-weight:800;color:var(--blue);font-size:16px}
+  .old{text-decoration:line-through;color:#8a96a8;font-size:12px;margin-left:6px}
+  .badge{font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:#fff4d6;color:#8a5b00;margin-left:6px}
+  .stock{font-size:12px;color:var(--ok)}
+  .stock.out{color:var(--err)}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:0;border-radius:12px;background:linear-gradient(90deg,var(--blue-d),var(--blue));color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none;box-shadow:0 6px 14px rgba(11,94,215,.25);margin-top:10px}
+  .btn:hover{filter:brightness(1.05)}
+  .btn[disabled]{background:#9fb4cf;box-shadow:none;cursor:not-allowed}
+  .btn.shopee{background:var(--shopee);box-shadow:0 6px 14px rgba(238,77,45,.25)}
+  .btn.tiktok{background:var(--tiktok);box-shadow:0 6px 14px rgba(0,0,0,.2)}
+  .btn.ghost{background:#eef3fa;color:var(--text);box-shadow:none}
+  .btn .logo-slot{display:inline-block;min-width:4px}
+  .partner-note{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+
+  /* ---------- Forms ---------- */
+  .field-label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}
+  .input input,.input textarea,.field input,.field textarea{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;font-family:inherit;background:#fbfdff;color:var(--text)}
+  .input input:focus,.input textarea:focus,.field input:focus,.field textarea:focus{outline:2px solid var(--blue-l);border-color:transparent}
+  .radio{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer;background:#fff}
+  .radio:has(input:checked){border-color:var(--blue-l);background:#f7fbff}
+  .radio input{margin-top:4px}
+  .radio b{display:block;font-size:14px}
+  .radio span{font-size:12px;color:var(--muted)}
+
+  /* ---------- Summary ---------- */
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  td,th{border-bottom:1px solid var(--line);padding:9px 4px;text-align:left;font-size:14px;vertical-align:top}
+  th{font-weight:700}
+  .right{text-align:right}
+  .pay{background:#f0f6ff;border-radius:12px;padding:12px 14px;margin:14px 0;font-size:14px;line-height:1.7}
+  .pay strong{color:var(--blue)}
+  .bank{white-space:pre-line;font-size:13px;color:var(--muted);margin-top:8px}
+  .slip-preview{width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
+  .detail-img{width:100%;border-radius:14px;aspect-ratio:1;object-fit:cover;background:#eaf2ff}
+  .detail-price{font-size:26px;font-weight:800;color:var(--blue);margin:10px 0 4px}
+  .desc{border-top:1px solid var(--line);margin-top:16px;padding-top:12px;white-space:pre-line;font-size:14px;line-height:1.7}
 </style>
 </head>
 <body>
-<header>
-  <a href="#/" class="logo">ร้านของฉัน</a>
-  <nav><a href="admin.html">หลังบ้าน</a></nav>
+
+<header class="topbar">
+  <a class="brand" href="#/">
+    <div class="logo"></div>
+    <div>
+      <div class="brand-name">ร้านของฉัน</div>
+      <div class="brand-sub">ขายของออนไลน์</div>
+    </div>
+  </a>
+  <a class="top-link" href="admin.html">หลังบ้าน</a>
 </header>
-<main id="app"></main>
+
+<div id="app"></div>
 
 <script>
-const KEY = 'shop-demo-v1';
+/*
+ * หน้าร้าน (เวอร์ชันตัวอย่าง): ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น
+ * ลิงก์ Shopee / TikTok ในข้อมูลตัวอย่างเป็นค่าว่าง จึงยังไม่แสดงปุ่ม ให้ใส่ลิงก์พันธมิตรจริงในหลังบ้าน
+ */
+const KEY = 'shop-front-v1';
+const SHIPPING_DEFAULT = 40;
 const HOSTS = {
   shopee: ['shopee.co.th', 's.shopee.co.th', 'shope.ee'],
   tiktok: ['tiktok.com', 'vt.tiktok.com', 'shop.tiktok.com'],
 };
 const CHANNEL_LABEL = { shopee: 'Shopee', tiktok: 'TikTok' };
 
-let data;
+let data = load();
 
-const $ = (s) => document.querySelector(s);
+const $app = () => document.getElementById('app');
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const baht = (n) => '฿' + Number(n).toLocaleString('th-TH');
 const nowBkk = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 16);
 
 function seed() {
   return {
-    settings: { bank: 'ธนาคารตัวอย่าง เลขที่บัญชี 000-0-00000-0 ชื่อบัญชี ร้านของฉัน' },
+    bank: 'ธนาคารตัวอย่าง เลขที่บัญชี 000-0-00000-0 ชื่อบัญชี ร้านของฉัน',
     categories: [
       { id: 1, name: 'เสื้อผ้า', slug: 'clothes' },
       { id: 2, name: 'ขนม', slug: 'snacks' },
       { id: 3, name: 'น้ำหอม', slug: 'perfume' },
     ],
     products: [
-      { id: 1, name: 'เสื้อยืดคอกลม ผ้าฝ้าย', slug: 'cotton-tee', categoryId: 1, description: 'ผ้าฝ้ายนุ่ม ระบายอากาศดี', price: 199, status: 'published', onHand: 20, reserved: 0, image: '', discount: { kind: 'percent', value: 20, start: '', end: '' }, links: {}, clicks: { shopee: 0, tiktok: 0 } },
-      { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, status: 'published', onHand: 50, reserved: 0, image: '', discount: null, links: {}, clicks: { shopee: 0, tiktok: 0 } },
-      { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, status: 'draft', onHand: 5, reserved: 0, image: '', discount: null, links: {}, clicks: { shopee: 0, tiktok: 0 } },
+      { id: 1, name: 'เสื้อยืดคอกลม ผ้าฝ้าย', slug: 'cotton-tee', categoryId: 1, description: 'ผ้าฝ้ายนุ่ม ระบายอากาศดี', price: 199, shipping: SHIPPING_DEFAULT, onHand: 20, reserved: 0, image: '', discount: { kind: 'percent', value: 20 }, links: {} },
+      { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
+      { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
     ],
     orders: [],
-    nextId: { product: 4, order: 1, category: 4 },
+    nextOrderId: 1,
   };
 }
-
 function load() {
-  try { data = JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { data = seed(); }
+  try { return JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { return seed(); }
 }
 function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
 
-/* ---------- ราคาและสต๊อก (ตรรกะเดียวกับเวอร์ชันเซิร์ฟเวอร์) ---------- */
-function discountActive(d, now) {
-  if (d.start && now < d.start) return false;
-  if (d.end && now > d.end) return false;
-  return true;
-}
+/* ---------- ราคาและสต๊อก ---------- */
 function priceOf(p) {
   const now = nowBkk();
   let price = p.price;
   const d = p.discount;
-  if (d && discountActive(d, now)) {
+  if (d) {
     const v = d.kind === 'percent' ? Math.floor((p.price * (100 - d.value)) / 100) : Math.max(0, p.price - d.value);
     if (v < price) price = v;
   }
@@ -107,8 +167,9 @@ function priceOf(p) {
 }
 const available = (p) => Math.max(0, p.onHand - p.reserved);
 const catById = (id) => data.categories.find((c) => c.id === id);
-const published = () => data.products.filter((p) => p.status === 'published');
-
+const published = () => data.products;
+const productBySlug = (slug) => data.products.find((p) => p.slug === slug);
+const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => p.links[ch] && allowedLink(ch, p.links[ch]));
 function allowedLink(ch, raw) {
   let u;
   try { u = new URL(raw); } catch { return false; }
@@ -116,7 +177,7 @@ function allowedLink(ch, raw) {
   return HOSTS[ch].some((h) => u.hostname === h || u.hostname.endsWith('.' + h));
 }
 
-/* ---------- หน้าบ้าน ---------- */
+/* ---------- ชิ้นส่วนแสดงผล ---------- */
 function priceHtml(p) {
   const pr = priceOf(p);
   if (!pr.discounted) return `<span class="price">${baht(pr.price)}</span>`;
@@ -126,198 +187,193 @@ const stockHtml = (p) => available(p) > 0
   ? `<span class="stock">คงเหลือในร้าน ${available(p)} ชิ้น</span>`
   : `<span class="stock out">สินค้าหมดในร้าน</span>`;
 const thumb = (p) => p.image ? `<img class="thumb" src="${esc(p.image)}" alt="">` : `<div class="thumb">ยังไม่มีรูป</div>`;
+function stepBar(n) { return `<div class="step">ขั้นตอนที่ ${n} จาก 3</div>`; }
 
-function catPills() {
-  return data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('');
+/* ---------- หน้าต่างๆ ---------- */
+function pageHome() {
+  const pills = data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('');
+  return `<div class="hero">
+      <h1>สินค้าคัดสรร <span class="hl">ราคาดีทุกวัน</span></h1>
+      <p>สั่งที่ร้านหรือซื้อผ่านแพลตฟอร์มก็ได้</p>
+      <div class="perks">
+        <div class="perk"><div class="pi">✓</div><b>ของแท้</b>คัดจากแบรนด์</div>
+        <div class="perk"><div class="pi">🚚</div><b>ส่งไว</b>ส่งทุกวัน</div>
+        <div class="perk"><div class="pi">฿</div><b>เก็บเงินปลายทาง</b>ได้</div>
+      </div>
+    </div>
+    <main>
+      <div class="pills">${pills}</div>
+      <div class="section">สินค้าทั้งหมด</div>
+      ${grid(published())}
+    </main>`;
 }
 function grid(list) {
   if (!list.length) return '<p class="muted">ยังไม่มีสินค้าให้แสดง</p>';
-  return `<div class="grid">${list.map((p) => `<a class="card" href="#/p/${esc(p.slug)}">${thumb(p)}
-    <div style="margin-top:8px">${esc(p.name)}</div><div>${priceHtml(p)}</div>${stockHtml(p)}</a>`).join('')}</div>`;
+  return `<div class="grid">${list.map((p) => `<a class="pcard" href="#/p/${esc(p.slug)}">${thumb(p)}
+    <div class="pname">${esc(p.name)}</div><div>${priceHtml(p)}</div>${stockHtml(p)}</a>`).join('')}</div>`;
 }
-function storeHome() {
-  return `<div>${catPills()}</div><h2>สินค้าทั้งหมด</h2>${grid(published())}`;
-}
-function storeCategory(slug) {
+function pageCategory(slug) {
   const cat = data.categories.find((c) => c.slug === slug);
-  if (!cat) return notFound();
-  return `<div>${catPills()}</div><h2>${esc(cat.name)}</h2>${grid(published().filter((p) => p.categoryId === cat.id))}`;
+  if (!cat) return pageNotFound();
+  return `<main><div class="section">${esc(cat.name)}</div>${grid(published().filter((p) => p.categoryId === cat.id))}
+    <p style="margin-top:14px"><a href="#/">← กลับหน้าแรก</a></p></main>`;
 }
-function storeProduct(slug) {
-  const p = data.products.find((x) => x.slug === slug && x.status === 'published');
-  if (!p) return notFound();
-  const pr = priceOf(p);
+function pageProduct(slug) {
+  const p = productBySlug(slug);
+  if (!p) return pageNotFound();
   const av = available(p);
-  const ext = ['shopee', 'tiktok'].filter((ch) => p.links[ch] && p.links[ch].active);
-  const buy = av > 0
-    ? `<form onsubmit="buy(event,${p.id})" style="margin-top:12px">
-        <label>จำนวน (คงเหลือ ${av} ชิ้น)</label>
-        <input name="qty" type="number" min="1" max="${Math.min(50, av)}" value="1" required>
-        <label>ชื่อผู้รับ</label><input name="name" required>
-        <label>เบอร์โทร</label><input name="phone" required>
-        <label>หมายเหตุ</label><textarea name="note" rows="2"></textarea>
-        <button class="btn block" type="submit" style="margin-top:12px">ซื้อที่ร้าน</button>
-      </form>`
-    : `<button class="btn block" disabled style="margin-top:12px">ซื้อที่ร้าน (สินค้าหมด)</button>`;
-  const extHtml = ext.map((ch) => `<a class="btn alt block" href="${esc(p.links[ch].url)}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')">ซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
-  const disc = ext.length ? '<p class="muted" style="font-size:12px">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</p>' : '';
+  const pr = priceOf(p);
+  const ext = extChannels(p);
   const cat = catById(p.categoryId);
-  return `<div class="detail">
-    <div>${p.image ? `<img src="${esc(p.image)}" style="width:100%;border-radius:12px">` : `<div class="thumb" style="min-height:360px;border-radius:12px">ยังไม่มีรูปสินค้า</div>`}</div>
-    <div>
-      <h1>${esc(p.name)}</h1>
+  const storeBtn = av > 0
+    ? `<a class="btn" href="#/p/${esc(p.slug)}/checkout">สั่งซื้อสินค้าราคา ${baht(pr.price)}</a>`
+    : `<button class="btn" disabled>สินค้าหมดในร้าน</button>`;
+  const extBtns = ext.map((ch) => `<a class="btn ${ch}" href="${esc(p.links[ch])}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')"><span class="logo-slot"></span>สั่งซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
+  const note = ext.length ? '<div class="partner-note">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</div>' : '';
+  return `<main>
+    <div class="card">
+      ${p.image ? `<img class="detail-img" src="${esc(p.image)}" alt="">` : `<div class="thumb" style="aspect-ratio:1;border-radius:14px">ยังไม่มีรูปสินค้า</div>`}
+      <h2 style="margin-top:14px">${esc(p.name)}</h2>
       ${cat ? `<div class="muted">หมวด ${esc(cat.name)}</div>` : ''}
-      <div style="margin:16px 0;font-size:24px">${priceHtml(p)}</div>
+      <div class="detail-price">${baht(pr.price)}${pr.discounted ? `<span class="old">${baht(pr.original)}</span>` : ''}</div>
       <div>${stockHtml(p)}</div>
-      ${buy}${extHtml}${disc}
-      ${!av && !ext.length ? '<p class="muted">ติดต่อสอบถามทางร้านได้โดยตรง</p>' : ''}
-      <div style="border-top:1px solid #e4e4e0;margin-top:20px;padding-top:16px;line-height:1.7;white-space:pre-line">${esc(p.description)}</div>
+      ${storeBtn}
+      ${extBtns}
+      ${note}
+      <div class="desc">${esc(p.description)}</div>
     </div>
-  </div>`;
+  </main>`;
 }
-function trackClick(id, ch) {
-  const p = data.products.find((x) => x.id === id);
-  if (p) { p.clicks[ch] = (p.clicks[ch] || 0) + 1; save(); }
+
+/* ขั้นตอนที่ 2: ข้อมูลผู้รับและวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
+function pageCheckout(slug, draft, error = '') {
+  const p = productBySlug(slug);
+  if (!p) return pageNotFound();
+  if (available(p) < 1) { location.hash = '#/p/' + slug; return ''; }
+  const d = draft || { qty: 1, name: '', phone: '', address: '', note: '', method: 'transfer' };
+  return `<main><div class="card">
+    ${stepBar(2)}
+    <h2>${esc(p.name)}</h2>
+    <div class="muted">${baht(priceOf(p).price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping)}</div>
+    ${error ? `<div class="err">${esc(error)}</div>` : ''}
+    <form onsubmit="goStep3(event,'${esc(p.slug)}')">
+      <label class="field-label">จำนวน (คงเหลือ ${available(p)} ชิ้น)</label>
+      <div class="field"><input name="qty" type="number" min="1" max="${Math.min(50, available(p))}" value="${d.qty}" required></div>
+      <label class="field-label">ชื่อผู้รับ</label>
+      <div class="field"><input name="customer_name" value="${esc(d.name)}" required></div>
+      <label class="field-label">เบอร์โทร</label>
+      <div class="field"><input name="phone" value="${esc(d.phone)}" required></div>
+      <label class="field-label">ที่อยู่จัดส่ง</label>
+      <div class="field"><textarea name="address" rows="3" required>${esc(d.address)}</textarea></div>
+      <label class="field-label">หมายเหตุ</label>
+      <div class="field"><textarea name="note" rows="2">${esc(d.note)}</textarea></div>
+      <label class="field-label">วิธีชำระเงิน</label>
+      <label class="radio"><input type="radio" name="payment_method" value="transfer" ${d.method === 'transfer' ? 'checked' : ''}>
+        <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า + ค่าจัดส่ง</span></div></label>
+      <label class="radio"><input type="radio" name="payment_method" value="cod" ${d.method === 'cod' ? 'checked' : ''}>
+        <div><b>เก็บเงินปลายทาง</b><span>โอนค่าจัดส่ง ${baht(p.shipping)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
+      <button class="btn" type="submit">สั่งซื้อสินค้า</button>
+    </form>
+  </div></main>`;
 }
-function buy(e, id) {
+
+/* ขั้นตอนที่ 3: สรุปยอด แนบสลิป และยืนยันในหน้าเดียว */
+function pageConfirm(slug, draft) {
+  const p = productBySlug(slug);
+  if (!p || !draft) return pageNotFound();
+  const subtotal = priceOf(p).price * draft.qty;
+  const total = subtotal + p.shipping;
+  const cod = draft.method === 'cod';
+  const dueNow = cod ? p.shipping : total;
+  const onDelivery = cod ? subtotal : 0;
+  const payLines = cod
+    ? `<div>ชำระตอนนี้ (ค่าจัดส่ง) <strong>${baht(dueNow)}</strong></div><div>ชำระตอนรับของ (ค่าสินค้า) <strong>${baht(onDelivery)}</strong></div>`
+    : `<div>ชำระตอนนี้ <strong>${baht(dueNow)}</strong></div>`;
+  return `<main><div class="card">
+    ${stepBar(3)}
+    <h2>ยืนยันการสั่งซื้อ</h2>
+    <table>
+      <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
+      <tr><td>${esc(p.name)}</td><td class="right">${draft.qty}</td><td class="right">${baht(subtotal)}</td></tr>
+      <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(p.shipping)}</td></tr>
+      <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(total)}</th></tr>
+    </table>
+    <div class="pay">${payLines}<div class="bank">${esc(data.bank)}</div></div>
+    <form onsubmit="confirmOrder(event,'${esc(p.slug)}')">
+      <label class="field-label">แนบสลิปการโอน (JPG, PNG หรือ WEBP ไม่เกิน 2 MB)</label>
+      <div class="field"><input type="file" name="slip" accept="image/jpeg,image/png,image/webp" required onchange="previewSlip(this)"></div>
+      <img id="slipPreview" class="slip-preview" style="display:none" alt="">
+      <button class="btn" type="submit">ยืนยันการสั่งซื้อ</button>
+    </form>
+  </div></main>`;
+}
+
+function pageOrder(id) {
+  const o = data.orders.find((x) => x.id === id);
+  if (!o) return pageNotFound();
+  const statusText = { pending: 'รอการตรวจสอบการชำระเงิน', paid: 'ชำระเงินแล้ว', cancelled: 'ยกเลิกแล้ว' };
+  const cod = o.payment === 'cod';
+  return `<main><div class="card">
+    <h2>คำสั่งซื้อ #${o.id}</h2>
+    <div class="muted">สถานะ: ${statusText[o.status]} · ${cod ? 'เก็บเงินปลายทาง' : 'โอนชำระเต็มจำนวน'}</div>
+    <table>
+      <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
+      ${o.items.map((i) => `<tr><td>${esc(i.name)}</td><td class="right">${i.qty}</td><td class="right">${baht(i.unitPrice * i.qty)}</td></tr>`).join('')}
+      <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(o.shipping)}</td></tr>
+      <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(o.total)}</th></tr>
+    </table>
+    ${o.status === 'pending' ? `<div class="pay">${cod
+      ? `โอนค่าจัดส่ง <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง เมื่อได้รับสินค้าให้ชำระค่าสินค้า <strong>${baht(o.onDelivery)}</strong> กับพนักงานส่ง`
+      : `โอนเงิน <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง`}
+      <div>ทีมงานจะตรวจสลิปและยืนยันคำสั่งซื้อให้</div>
+      <div class="bank">${esc(data.bank)}</div></div>` : ''}
+    <p style="margin-top:12px"><a href="#/">← กลับหน้าแรก</a></p>
+  </div></main>`;
+}
+function pageNotFound() {
+  return `<main><div class="card"><h2>ไม่พบหน้าที่ต้องการ</h2><p style="margin-top:10px"><a href="#/">← กลับหน้าแรก</a></p></div></main>`;
+}
+
+/* ---------- การทำงานของฟอร์ม ---------- */
+let draft = null; /* ข้อมูลจากขั้นตอนที่ 2 ส่งต่อไปขั้นตอนที่ 3 */
+
+function goStep3(e, slug) {
   e.preventDefault();
   const f = new FormData(e.target);
-  const qty = parseInt(f.get('qty'), 10);
-  const name = String(f.get('name') || '').trim();
-  const phone = String(f.get('phone') || '').trim();
-  const note = String(f.get('note') || '').trim();
-  const p = data.products.find((x) => x.id === id);
-  if (!p || p.status !== 'published') return alert('ไม่พบสินค้า');
-  if (!(qty >= 1 && qty <= 50)) return alert('จำนวนต้องอยู่ระหว่าง 1 ถึง 50');
-  if (!name || !/^[0-9+\-\s]{9,15}$/.test(phone)) return alert('กรุณากรอกชื่อและเบอร์โทรที่ถูกต้อง');
-  if (qty > available(p)) return alert('สินค้าไม่พอ กรุณาลดจำนวนลง');
-  const unit = priceOf(p).price;
-  p.reserved += qty;
-  const order = {
-    id: data.nextId.order++, name, phone, note,
-    items: [{ productId: p.id, name: p.name, qty, unitPrice: unit }],
-    total: unit * qty, status: 'pending', createdAt: nowBkk(),
+  const p = productBySlug(slug);
+  const d = {
+    qty: parseInt(f.get('qty'), 10),
+    name: String(f.get('customer_name') || '').trim(),
+    phone: String(f.get('phone') || '').trim(),
+    address: String(f.get('address') || '').trim(),
+    note: String(f.get('note') || '').trim(),
+    method: f.get('payment_method') === 'cod' ? 'cod' : 'transfer',
   };
-  data.orders.unshift(order);
-  save();
-  location.hash = '#/order/' + order.id;
-}
-function orderPage(id) {
-  const o = data.orders.find((x) => x.id === id);
-  if (!o) return notFound();
-  const statusText = { pending: 'รอการชำระเงิน', paid: 'ชำระเงินแล้ว', cancelled: 'ยกเลิกแล้ว' };
-  return `<h1>คำสั่งซื้อ #${o.id}</h1>
-    <p class="muted">สถานะ: ${statusText[o.status]}</p>
-    <table><tr><th>สินค้า</th><th>จำนวน</th><th>ยอด</th></tr>
-    ${o.items.map((i) => `<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>${baht(i.unitPrice * i.qty)}</td></tr>`).join('')}
-    <tr><th colspan="2">รวมทั้งสิ้น</th><th>${baht(o.total)}</th></tr></table>
-    ${o.status === 'pending' ? `<div class="box"><p style="margin:0 0 8px">โอนเงินตามรายละเอียดด้านล่าง แล้วทีมงานจะยืนยันคำสั่งซื้อให้</p>${esc(data.settings.bank)}</div>` : ''}`;
-}
-function notFound() {
-  return '<h1>ไม่พบหน้าที่ต้องการ</h1><p><a href="#/">กลับหน้าแรก</a></p>';
+  let err = '';
+  if (!p) err = 'ไม่พบสินค้า';
+  else if (!(d.qty >= 1 && d.qty <= 50)) err = 'จำนวนต้องอยู่ระหว่าง 1 ถึง 50';
+  else if (d.qty > available(p)) err = `สินค้าเหลือ ${available(p)} ชิ้น`;
+  else if (!d.name) err = 'กรุณากรอกชื่อผู้รับ';
+  else if (!/^[0-9+\-\s]{9,15}$/.test(d.phone)) err = 'กรุณากรอกเบอร์โทรที่ถูกต้อง';
+  else if (d.address.length < 10) err = 'กรุณากรอกที่อยู่จัดส่งให้ครบ';
+  if (err) {
+    $app().innerHTML = pageCheckout(slug, d, err);
+    return;
+  }
+  draft = d;
+  location.hash = `#/p/${slug}/confirm`;
 }
 
-/* ---------- หลังบ้าน ---------- */
-function adminDashboard() {
-  const paidTotal = data.orders.filter((o) => o.status === 'paid').reduce((s, o) => s + o.total, 0);
-  const pending = data.orders.filter((o) => o.status === 'pending').length;
-  const clicks = data.products.reduce((s, p) => s + (p.clicks.shopee || 0) + (p.clicks.tiktok || 0), 0);
-  const prodRows = data.products.map((p) => {
-    const pr = priceOf(p);
-    const cat = catById(p.categoryId);
-    return `<tr><td><a href="#/admin/product/${p.id}">${esc(p.name)}</a></td><td>${esc(cat ? cat.name : '-')}</td>
-      <td>${baht(pr.price)}${pr.discounted ? ` <span class="muted">(ปกติ ${baht(pr.original)})</span>` : ''}</td>
-      <td>${p.onHand} / จอง ${p.reserved}</td><td>${p.status === 'published' ? 'เผยแพร่' : 'ร่าง'}</td></tr>`;
-  }).join('');
-  const orderRows = data.orders.map((o) => `<tr><td>#${o.id}</td><td>${esc(o.name)}<br><span class="muted">${esc(o.phone)}</span></td>
-    <td>${o.items.map((i) => `${esc(i.name)} x${i.qty}`).join('<br>')}</td><td>${baht(o.total)}</td><td>${o.status}</td>
-    <td>${o.status === 'pending'
-      ? `<button class="btn small" onclick="settle(${o.id},'paid')">ชำระแล้ว</button>
-         <button class="btn small alt" onclick="settle(${o.id},'cancelled')">ยกเลิก</button>` : ''}</td></tr>`).join('');
-  return `<div class="flex"><h1>หลังบ้าน</h1><a class="btn" href="#/admin/product/new">เพิ่มสินค้า</a></div>
-  <div class="row">
-    <div class="stat">ยอดที่ชำระแล้ว<b>${baht(paidTotal)}</b></div>
-    <div class="stat">ออเดอร์รอชำระ<b>${pending}</b></div>
-    <div class="stat">คลิกไป Shopee / TikTok<b>${clicks}</b></div>
-  </div>
-  <h2>สินค้า</h2>
-  <table><tr><th>ชื่อ</th><th>หมวด</th><th>ราคาขาย</th><th>สต๊อก / จอง</th><th>สถานะ</th></tr>${prodRows || '<tr><td colspan="5">ยังไม่มีสินค้า</td></tr>'}</table>
-  <h2>ออเดอร์</h2>
-  <table><tr><th>เลขที่</th><th>ผู้สั่ง</th><th>รายการ</th><th>ยอด</th><th>สถานะ</th><th></th></tr>${orderRows || '<tr><td colspan="6">ยังไม่มีออเดอร์</td></tr>'}</table>
-  <h2>หมวดสินค้า</h2>
-  <div>${data.categories.map((c) => `<span class="pill">${esc(c.name)} (${esc(c.slug)})</span>`).join('')}</div>
-  <form onsubmit="addCategory(event)" class="row" style="margin-top:12px;max-width:560px">
-    <input name="name" placeholder="ชื่อหมวด เช่น เสื้อผ้า" required>
-    <input name="slug" placeholder="slug เช่น clothes" required pattern="[a-z0-9-]+">
-    <button class="btn" type="submit" style="flex:none">เพิ่มหมวด</button>
-  </form>
-  <h2>ตั้งค่า</h2>
-  <form onsubmit="saveBank(event)" style="max-width:560px">
-    <label>ข้อมูลบัญชีรับโอน (แสดงหลังสั่งซื้อ)</label>
-    <textarea name="bank" rows="3">${esc(data.settings.bank)}</textarea>
-    <button class="btn" type="submit" style="margin-top:8px">บันทึก</button>
-  </form>
-  <p style="margin-top:32px"><button class="btn alt small" onclick="resetDemo()">รีเซ็ตข้อมูลตัวอย่าง</button></p>`;
+function previewSlip(input) {
+  const img = document.getElementById('slipPreview');
+  const file = input.files && input.files[0];
+  if (!file) { img.style.display = 'none'; return; }
+  const url = URL.createObjectURL(file);
+  img.src = url;
+  img.style.display = 'block';
 }
 
-function adminProduct(idParam) {
-  const isNew = idParam === 'new';
-  const p = isNew
-    ? { id: null, name: '', slug: '', categoryId: '', description: '', price: '', status: 'draft', onHand: 0, reserved: 0, image: '', discount: null, links: {}, clicks: {} }
-    : data.products.find((x) => x.id === Number(idParam));
-  if (!p) return notFound();
-  const d = p.discount || {};
-  const sel = (v, cur) => (String(cur ?? '') === String(v) ? 'selected' : '');
-  const link = (ch) => {
-    const l = p.links[ch];
-    return `<label>ลิงก์ ${CHANNEL_LABEL[ch]} (affiliate)</label>
-      <input name="${ch}Url" value="${esc(l ? l.url : '')}" placeholder="https://...">
-      <label style="font-weight:normal"><input type="checkbox" name="${ch}Active" ${l && l.active ? 'checked' : ''}> เปิดใช้งานปุ่ม ${CHANNEL_LABEL[ch]}</label>`;
-  };
-  return `<h1>${isNew ? 'สินค้าใหม่' : 'แก้ไขสินค้า'}</h1>
-  <form onsubmit="saveProduct(event, ${isNew ? "'new'" : p.id})" style="max-width:680px">
-    <label>ชื่อสินค้า</label><input name="name" value="${esc(p.name)}" required>
-    <label>slug (ใช้ใน URL เช่น cotton-tee)</label><input name="slug" value="${esc(p.slug)}" required pattern="[a-z0-9-]+">
-    <label>หมวด</label>
-    <select name="categoryId"><option value="">ไม่ระบุ</option>${data.categories.map((c) => `<option value="${c.id}" ${sel(c.id, p.categoryId)}>${esc(c.name)}</option>`).join('')}</select>
-    <label>รายละเอียด</label><textarea name="description" rows="4">${esc(p.description)}</textarea>
-    <div class="row">
-      <div><label>ราคาปกติ (บาท)</label><input name="price" type="number" min="0" step="1" value="${p.price}" required></div>
-      <div><label>สต๊อกในร้าน (ชิ้น)</label><input name="onHand" type="number" min="0" step="1" value="${p.onHand}" required></div>
-    </div>
-    <label>สถานะ</label>
-    <select name="status"><option value="draft" ${sel('draft', p.status)}>ร่าง</option><option value="published" ${sel('published', p.status)}>เผยแพร่</option></select>
-
-    <h2>ส่วนลด (ตัวเดียวต่อสินค้า)</h2>
-    <div class="row">
-      <div><label>ประเภท</label>
-        <select name="discountKind">
-          <option value="none" ${p.discount ? '' : 'selected'}>ไม่มี</option>
-          <option value="percent" ${sel('percent', d.kind)}>ลดเป็น %</option>
-          <option value="fixed" ${sel('fixed', d.kind)}>ลดเป็นบาท</option>
-        </select></div>
-      <div><label>ค่าส่วนลด</label><input name="discountValue" type="number" min="1" step="1" value="${d.value ?? ''}"></div>
-    </div>
-    <div class="row">
-      <div><label>เริ่ม (เวลาไทย)</label><input name="discountStart" type="datetime-local" value="${esc(d.start || '')}"></div>
-      <div><label>สิ้นสุด (เวลาไทย)</label><input name="discountEnd" type="datetime-local" value="${esc(d.end || '')}"></div>
-    </div>
-
-    <h2>ลิงก์ซื้อออนไลน์</h2>
-    ${link('shopee')}
-    ${link('tiktok')}
-
-    <h2>รูปสินค้า</h2>
-    ${p.image ? `<img src="${esc(p.image)}" style="width:160px;border-radius:8px;display:block;margin-bottom:8px">` : '<p class="muted">ยังไม่มีรูป</p>'}
-    <input type="file" name="image" accept="image/jpeg,image/png,image/webp">
-    <p class="muted" style="font-size:12px">ตัวอย่างนี้เก็บรูปในเบราว์เซอร์ จึงจำกัดขนาดไม่เกิน 2 MB</p>
-
-    <button class="btn" type="submit" style="margin-top:20px">บันทึก</button>
-    <a class="btn alt" href="#/admin" style="margin-left:8px">ยกเลิก</a>
-  </form>`;
-}
-
-function readFile(file) {
+function readAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
     r.onload = () => resolve(r.result);
@@ -326,119 +382,72 @@ function readFile(file) {
   });
 }
 
-async function saveProduct(e, id) {
+async function confirmOrder(e, slug) {
   e.preventDefault();
-  const f = new FormData(e.target);
-  const name = String(f.get('name') || '').trim();
-  const slug = String(f.get('slug') || '').trim().toLowerCase();
-  const description = String(f.get('description') || '').trim();
-  const price = parseInt(f.get('price'), 10);
-  const onHand = parseInt(f.get('onHand'), 10);
-  const categoryId = parseInt(f.get('categoryId'), 10) || null;
-  const status = f.get('status') === 'published' ? 'published' : 'draft';
+  const p = productBySlug(slug);
+  const f = e.target.elements.slip;
+  const file = f && f.files && f.files[0];
+  if (!p || !draft) return alert('ข้อมูลไม่ครบ กรุณาเริ่มสั่งซื้อใหม่');
+  if (!file) return alert('กรุณาแนบสลิปการโอน');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return alert('รองรับเฉพาะไฟล์ JPG, PNG และ WEBP');
+  if (file.size > 2 * 1024 * 1024) return alert('ไฟล์สลิปต้องไม่เกิน 2 MB');
+  if (draft.qty > available(p)) return alert('สินค้าไม่พอแล้ว กรุณาเริ่มสั่งซื้อใหม่');
 
-  if (!name) return alert('กรุณากรอกชื่อสินค้า');
-  if (!/^[a-z0-9-]+$/.test(slug)) return alert('slug ใช้ได้เฉพาะ a-z 0-9 และ -');
-  if (data.products.some((x) => x.slug === slug && x.id !== (id === 'new' ? null : id))) return alert('slug นี้ถูกใช้แล้ว');
-  if (!(price >= 0)) return alert('ราคาต้องเป็นจำนวนเต็มตั้งแต่ 0');
-
-  const existing = id === 'new' ? null : data.products.find((x) => x.id === id);
-  if (!(onHand >= 0)) return alert('สต๊อกต้องเป็นจำนวนเต็มตั้งแต่ 0');
-  if (existing && onHand < existing.reserved) return alert(`สต๊อกต่ำกว่าจำนวนที่ถูกจองอยู่ (${existing.reserved} ชิ้น)`);
-
-  const dk = f.get('discountKind');
-  const dv = parseInt(f.get('discountValue'), 10);
-  let discount = null;
-  if (dk === 'percent' || dk === 'fixed') {
-    if (dk === 'percent' && !(dv >= 1 && dv <= 99)) return alert('ส่วนลด % ต้องอยู่ระหว่าง 1 ถึง 99');
-    if (dk === 'fixed' && !(dv >= 1 && dv <= price)) return alert('ส่วนลดบาทต้องมากกว่า 0 และไม่เกินราคาสินค้า');
-    const start = String(f.get('discountStart') || '');
-    const end = String(f.get('discountEnd') || '');
-    if (start && end && start > end) return alert('วันสิ้นสุดต้องอยู่หลังวันเริ่มต้น');
-    discount = { kind: dk, value: dv, start, end };
+  const slip = await readAsDataUrl(file);
+  const unit = priceOf(p).price;
+  const subtotal = unit * draft.qty;
+  const total = subtotal + p.shipping;
+  const cod = draft.method === 'cod';
+  p.reserved += draft.qty;
+  const order = {
+    id: data.nextOrderId++,
+    name: draft.name, phone: draft.phone, address: draft.address, note: draft.note,
+    items: [{ productId: p.id, name: p.name, qty: draft.qty, unitPrice: unit }],
+    shipping: p.shipping,
+    total,
+    payment: draft.method,
+    dueNow: cod ? p.shipping : total,
+    onDelivery: cod ? subtotal : 0,
+    slip,
+    status: 'pending',
+    createdAt: nowBkk(),
+  };
+  data.orders.unshift(order);
+  try {
+    save();
+  } catch {
+    p.reserved -= draft.qty;
+    data.orders.shift();
+    data.nextOrderId--;
+    return alert('บันทึกไม่สำเร็จ สลิปอาจใหญ่เกินพื้นที่ของเบราว์เซอร์ ลองใช้ไฟล์ที่เล็กลง');
   }
-
-  const links = {};
-  for (const ch of ['shopee', 'tiktok']) {
-    const url = String(f.get(ch + 'Url') || '').trim();
-    if (!url) continue;
-    if (!allowedLink(ch, url)) return alert(`ลิงก์ ${CHANNEL_LABEL[ch]} ไม่ถูกต้องหรือไม่ใช่โดเมนที่อนุญาต`);
-    links[ch] = { url, active: !!f.get(ch + 'Active') };
-  }
-
-  let image = existing ? existing.image : '';
-  const file = f.get('image');
-  if (file && file.size) {
-    if (file.size > 2 * 1024 * 1024) return alert('ไฟล์รูปต้องไม่เกิน 2 MB');
-    image = await readFile(file);
-  }
-
-  if (existing) {
-    Object.assign(existing, { name, slug, description, price, status, categoryId, onHand, discount, links, image });
-  } else {
-    data.products.push({
-      id: data.nextId.product++, name, slug, description, price, status, categoryId, onHand,
-      reserved: 0, image, discount, links, clicks: { shopee: 0, tiktok: 0 },
-    });
-  }
-  save();
-  location.hash = '#/admin';
+  draft = null;
+  location.hash = '#/order/' + order.id;
 }
 
-function settle(id, action) {
-  const o = data.orders.find((x) => x.id === id);
-  if (!o || o.status !== 'pending') return;
-  for (const it of o.items) {
-    const p = data.products.find((x) => x.id === it.productId);
-    if (!p) continue;
-    p.reserved = Math.max(0, p.reserved - it.qty);
-    if (action === 'paid') p.onHand = Math.max(0, p.onHand - it.qty);
-  }
-  o.status = action === 'paid' ? 'paid' : 'cancelled';
-  save();
-  render();
+function trackClick(id, ch) {
+  /* ใช้ตอนเชื่อมระบบจริง ตอนนี้แค่บันทึกไว้ในเบราว์เซอร์ */
+  const p = data.products.find((x) => x.id === id);
+  if (p) { p.clicks = p.clicks || {}; p.clicks[ch] = (p.clicks[ch] || 0) + 1; save(); }
 }
 
-function addCategory(e) {
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const name = String(f.get('name') || '').trim();
-  const slug = String(f.get('slug') || '').trim().toLowerCase();
-  if (!name || !/^[a-z0-9-]+$/.test(slug)) return alert('ชื่อหมวดหรือ slug ไม่ถูกต้อง');
-  if (data.categories.some((c) => c.slug === slug)) return alert('slug นี้มีอยู่แล้ว');
-  data.categories.push({ id: data.nextId.category++, name, slug });
-  save();
-  render();
-}
-
-function saveBank(e) {
-  e.preventDefault();
-  data.settings.bank = String(new FormData(e.target).get('bank') || '');
-  save();
-  alert('บันทึกแล้ว');
-}
-
-function resetDemo() {
-  if (!confirm('ล้างข้อมูลทั้งหมดและกลับไปเป็นข้อมูลตัวอย่างใช่ไหม')) return;
-  localStorage.removeItem(KEY);
-  load();
-  render();
-}
-
-/* ---------- เราเตอร์ ---------- */
+/* ---------- เส้นทาง ---------- */
 function render() {
-  const parts = (location.hash.replace(/^#\/?/, '')).split('/').filter(Boolean);
+  data = load();
+  const h = location.hash || '#/';
   let html;
-  if (parts.length === 0) html = storeHome();
-  else if (parts[0] === 'c') html = storeCategory(parts[1]);
-  else if (parts[0] === 'p') html = storeProduct(parts[1]);
-  else if (parts[0] === 'order') html = orderPage(Number(parts[1]));
-  else html = notFound();
-  $('#app').innerHTML = html;
+  let m;
+  if ((m = h.match(/^#\/p\/([^/]+)\/checkout$/))) html = pageCheckout(m[1], draft);
+  else if ((m = h.match(/^#\/p\/([^/]+)\/confirm$/))) html = pageConfirm(m[1], draft);
+  else if ((m = h.match(/^#\/p\/([^/]+)$/))) html = pageProduct(m[1]);
+  else if ((m = h.match(/^#\/c\/([^/]+)$/))) html = pageCategory(m[1]);
+  else if ((m = h.match(/^#\/order\/(\d+)$/))) html = pageOrder(Number(m[1]));
+  else if (h === '#/' || h === '') html = pageHome();
+  else html = pageNotFound();
+  $app().innerHTML = html;
+  window.scrollTo(0, 0);
 }
-
 window.addEventListener('hashchange', render);
-load();
 render();
 </script>
 </body>
