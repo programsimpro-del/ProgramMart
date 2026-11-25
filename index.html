@@ -413,8 +413,7 @@ function pagePay(slug, d, error = '') {
   const sp = esc(p.slug);
   return `<div class="wrap narrow">
     <h2 class="section-title" style="margin-bottom:4px">ชำระเงิน</h2>
-    <p class="muted" style="margin:0 0 12px">${esc(p.name)}${vr ? ' (' + esc(vr.name) + ')' : ''} × ${d.qty}</p>
-    ${error ? `<p class="err">${esc(error)}</p>` : ''}
+        ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="payForm" onsubmit="submitPay(event,'${sp}')">
             <div class="paylist">
         <label class="payrow">
