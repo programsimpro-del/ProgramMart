@@ -416,8 +416,7 @@ function pagePay(slug, d, error = '') {
     <p class="muted" style="margin:0 0 12px">${esc(p.name)}${vr ? ' (' + esc(vr.name) + ')' : ''} × ${d.qty}</p>
     ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="payForm" onsubmit="submitPay(event,'${sp}')">
-      <label class="field-label">เลือกช่องทางการชำระเงิน</label>
-      <div class="paylist">
+            <div class="paylist">
         <label class="payrow">
           <span class="pico">฿</span>
           <span class="ptxt"><b>โอนชำระเต็มจำนวน</b></span>
