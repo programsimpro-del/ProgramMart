@@ -1,0 +1,24 @@
+# ตั้งค่าสำหรับ Render: New → Blueprint แล้วเลือก repo นี้
+services:
+  - type: web
+    name: shop
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /data
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: SITE_URL
+        sync: false
+      - key: BANK_INFO
+        sync: false
+    disk:
+      name: shop-data
+      mountPath: /data
+      sizeGB: 1
