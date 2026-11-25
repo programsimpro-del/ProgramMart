@@ -412,7 +412,7 @@ function pagePay(slug, d, error = '') {
   const method = d.method === 'cod' ? 'cod' : 'transfer';
   const sp = esc(p.slug);
   return `<div class="wrap narrow">
-    <h2 class="section-title" style="margin-bottom:4px">ชำระเงิน</h2>
+    <h2 class="section-title" style="margin-bottom:4px">เลือกช่องทางการชำระเงิน</h2>
         ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="payForm" onsubmit="submitPay(event,'${sp}')">
             <div class="paylist">
