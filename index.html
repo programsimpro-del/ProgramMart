@@ -95,6 +95,15 @@
 .variant.off{opacity:.5;cursor:not-allowed}
 .variant:has(input:checked){border:1.5px solid #1f1f1f}
 .link-btn{background:none;border:0;padding:0;color:#993c1d;font-size:14px;cursor:pointer;font-family:inherit;text-decoration:underline}
+.summary{border:0.5px solid #e4e4e0;border-radius:10px;padding:12px 14px;margin:16px 0}
+.srow{display:flex;justify-content:space-between;padding:4px 0;font-size:15px}
+.srow.disc{color:#27500a}
+.srow.total{border-top:0.5px solid #e4e4e0;margin-top:6px;padding-top:8px;font-weight:500}
+.srow.pay{color:#993c1d;font-weight:500}
+.qty-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.qbtn{width:44px;height:44px;border:0.5px solid #b4b2a9;border-radius:8px;background:#fff;font-size:20px;cursor:pointer}
+.qty-input{width:80px;height:44px;text-align:center;font-size:16px;border:0.5px solid #b4b2a9;border-radius:8px}
+.vprice{color:#993c1d;font-size:14px}
 </style>
 </head>
 <body>
@@ -143,8 +152,8 @@ function seed() {
     ],
     products: [
       { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 0, reserved: 0, image: '', discount: { kind: 'fixed', value: 300 }, links: {}, variants: [
-        { id: 'black', name: 'สีดำ', image: '', onHand: 6, reserved: 0 },
-        { id: 'brown', name: 'สีน้ำตาล', image: '', onHand: 6, reserved: 0 },
+        { id: 'black', name: 'สีดำ', image: '', price: 1290, onHand: 6, reserved: 0 },
+        { id: 'brown', name: 'สีน้ำตาล', image: '', price: 1290, onHand: 6, reserved: 0 },
       ] },
       { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
       { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
@@ -159,16 +168,18 @@ function load() {
 function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
 
 /* ---------- ราคาและสต๊อก ---------- */
-function priceOf(p) {
-  let price = p.price;
+function priceFor(p, vr) {
+  const base = vr && vr.price != null ? vr.price : p.price;
+  let price = base;
   const d = p.discount;
   if (d) {
-    const v = d.kind === 'percent' ? Math.floor((p.price * (100 - d.value)) / 100) : Math.max(0, p.price - d.value);
-    if (v < price) price = v;
+    const x = d.kind === 'percent' ? Math.floor((base * (100 - d.value)) / 100) : Math.max(0, base - d.value);
+    if (x < price) price = x;
   }
-  const discounted = price < p.price;
-  return { original: p.price, price, discounted, pct: discounted && p.price ? Math.round((1 - price / p.price) * 100) : 0 };
+  const discounted = price < base;
+  return { original: base, price, discounted, pct: discounted && base ? Math.round((1 - price / base) * 100) : 0 };
 }
+function priceOf(p) { return priceFor(p, null); }
 const variantAvail = (v) => Math.max(0, v.onHand - v.reserved);
 const hasVariants = (p) => Array.isArray(p.variants) && p.variants.length > 0;
 const available = (p) => hasVariants(p)
@@ -256,32 +267,87 @@ function pageProduct(slug) {
   </div>`;
 }
 
-/* ขั้นตอนที่ 2: ข้อมูลผู้รับและวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
+/* ขั้นตอนที่ 2: เลือกตัวเลือก จำนวน ข้อมูลผู้รับ และวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
+function summaryFor(p, vr, qty, method) {
+  const pr = priceFor(p, vr);
+  const listTotal = pr.original * qty;
+  const subtotal = pr.price * qty;
+  const discount = listTotal - subtotal;
+  const total = subtotal + p.shipping;
+  const cod = method === 'cod';
+  return { pr, listTotal, discount, subtotal, total, cod, dueNow: cod ? p.shipping : total, onDelivery: cod ? subtotal : 0 };
+}
+function summaryHtml(p, vr, qty, method) {
+  const s = summaryFor(p, vr, qty, method);
+  return `<div class="summary">
+    <div class="srow"><span>ราคาสินค้า ${qty} ชิ้น</span><span>${baht(s.listTotal)}</span></div>
+    ${s.discount > 0 ? `<div class="srow disc"><span>ส่วนลด${s.pr.pct ? ' ' + s.pr.pct + '%' : ''}</span><span>-${baht(s.discount)}</span></div>` : ''}
+    <div class="srow"><span>ค่าจัดส่ง</span><span>${baht(p.shipping)}</span></div>
+    <div class="srow total"><span>รวมทั้งสิ้น</span><span>${baht(s.total)}</span></div>
+    <div class="srow pay"><span>${s.cod ? 'ชำระตอนนี้ (ค่าจัดส่ง)' : 'ชำระตอนนี้'}</span><span>${baht(s.dueNow)}</span></div>
+    ${s.cod ? `<div class="srow pay"><span>ชำระตอนรับของ (ค่าสินค้า)</span><span>${baht(s.onDelivery)}</span></div>` : ''}
+  </div>`;
+}
+function checkoutState(slug) {
+  const p = productBySlug(slug);
+  const form = document.getElementById('checkoutForm');
+  if (!p || !form) return null;
+  const vid = form.elements.variant ? form.elements.variant.value : '';
+  const vr = hasVariants(p) ? (p.variants.find((x) => x.id === vid) || null) : null;
+  const limit = hasVariants(p) ? (vr ? variantAvail(vr) : 0) : available(p);
+  return { p, vr, limit, form };
+}
+function refreshSummary(slug) {
+  const st = checkoutState(slug);
+  if (!st) return;
+  const { p, vr, limit, form } = st;
+  const input = form.elements.qty;
+  let n = parseInt(input.value, 10) || 1;
+  n = Math.max(1, Math.min(n, Math.min(50, limit) || 1));
+  input.value = n;
+  input.max = Math.min(50, limit);
+  const method = form.elements.payment_method.value === 'cod' ? 'cod' : 'transfer';
+  document.getElementById('stockLabel').textContent = `จำนวน (คงเหลือ ${limit} ชิ้น)`;
+  document.getElementById('summary').innerHTML = summaryHtml(p, vr, n, method);
+}
+function stepQty(slug, delta) {
+  const st = checkoutState(slug);
+  if (!st || st.limit < 1) return;
+  st.form.elements.qty.value = (parseInt(st.form.elements.qty.value, 10) || 1) + delta;
+  refreshSummary(slug);
+}
 function pageCheckout(slug, d, error = '') {
   const p = productBySlug(slug);
   if (!p) return pageNotFound();
   if (available(p) < 1) { location.hash = '#/p/' + slug; return ''; }
   const v = d || { qty: 1, name: '', phone: '', address: '', note: '', method: 'transfer', variant: '' };
   const pick = hasVariants(p) ? (p.variants.find((x) => x.id === v.variant && variantAvail(x) > 0) || firstInStock(p)) : null;
+  const limit = hasVariants(p) ? (pick ? variantAvail(pick) : 0) : available(p);
+  const qty = Math.max(1, Math.min(v.qty || 1, limit || 1));
+  const method = v.method === 'cod' ? 'cod' : 'transfer';
+  const sp = esc(p.slug);
   const variantsHtml = hasVariants(p) ? `<label class="field-label">เลือกตัวเลือกสินค้า</label>
       <div class="variants">${p.variants.map((x) => {
         const n = variantAvail(x);
         return `<label class="variant ${n < 1 ? 'off' : ''}">
-          <input type="radio" name="variant" value="${esc(x.id)}" ${pick && pick.id === x.id ? 'checked' : ''} ${n < 1 ? 'disabled' : ''}>
+          <input type="radio" name="variant" value="${esc(x.id)}" onchange="refreshSummary('${sp}')" ${pick && pick.id === x.id ? 'checked' : ''} ${n < 1 ? 'disabled' : ''}>
           ${x.image ? `<img src="${esc(x.image)}" alt="">` : '<span class="vthumb"></span>'}
-          <span><b>${esc(x.name)}</b><small>${n > 0 ? 'เหลือ ' + n + ' ชิ้น' : 'หมดแล้ว'}</small></span>
+          <span><b>${esc(x.name)}</b><small class="vprice">${baht(priceFor(p, x).price)}</small><small>${n > 0 ? 'เหลือ ' + n + ' ชิ้น' : 'หมดแล้ว'}</small></span>
         </label>`;
       }).join('')}</div>` : '';
   return `<div class="wrap narrow">
-    ${stepLabel(2)}
     ${p.image ? `<img class="step-img" src="${esc(p.image)}" alt="">` : '<div class="step-img thumb">รูปสินค้าจากหลังบ้าน</div>'}
-    <h2 class="section-title" style="margin-bottom:4px">${esc(p.name)}</h2>
-    <p class="muted" style="margin:0 0 12px">${baht(priceOf(p).price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping)}</p>
+    <h2 class="section-title" style="margin-bottom:12px">${esc(p.name)}</h2>
     ${error ? `<p class="err">${esc(error)}</p>` : ''}
-    <form onsubmit="goStep3(event,'${esc(p.slug)}')">
+    <form id="checkoutForm" onsubmit="goStep3(event,'${sp}')">
       ${variantsHtml}
-      <label class="field-label">จำนวน (คงเหลือ ${available(p)} ชิ้น)</label>
-      <div class="field"><input name="qty" type="number" min="1" max="${Math.min(50, available(p))}" value="${v.qty}" required></div>
+      <label class="field-label" id="stockLabel">จำนวน (คงเหลือ ${limit} ชิ้น)</label>
+      <div class="qty-row">
+        <button type="button" class="qbtn" onclick="stepQty('${sp}',-1)" aria-label="ลดจำนวน">−</button>
+        <input class="qty-input" name="qty" type="number" min="1" max="${Math.min(50, limit)}" value="${qty}" oninput="refreshSummary('${sp}')" required>
+        <button type="button" class="qbtn" onclick="stepQty('${sp}',1)" aria-label="เพิ่มจำนวน">+</button>
+      </div>
+      <div id="summary">${summaryHtml(p, pick, qty, method)}</div>
       <label class="field-label">ชื่อผู้รับ</label>
       <div class="field"><input name="customer_name" value="${esc(v.name)}" required></div>
       <label class="field-label">เบอร์โทร</label>
@@ -293,9 +359,9 @@ function pageCheckout(slug, d, error = '') {
       <label class="field-label">หมายเหตุ</label>
       <div class="field"><textarea name="note" rows="2">${esc(v.note)}</textarea></div>
       <label class="field-label">วิธีชำระเงิน</label>
-      <label class="option"><input type="radio" name="payment_method" value="transfer" ${v.method === 'transfer' ? 'checked' : ''}>
+      <label class="option"><input type="radio" name="payment_method" value="transfer" onchange="refreshSummary('${sp}')" ${method === 'transfer' ? 'checked' : ''}>
         <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า + ค่าจัดส่ง</span></div></label>
-      <label class="option"><input type="radio" name="payment_method" value="cod" ${v.method === 'cod' ? 'checked' : ''}>
+      <label class="option"><input type="radio" name="payment_method" value="cod" onchange="refreshSummary('${sp}')" ${method === 'cod' ? 'checked' : ''}>
         <div><b>เก็บเงินปลายทาง</b><span>โอนค่าจัดส่ง ${baht(p.shipping)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
       <button class="btn" type="submit" style="margin-top:24px">สั่งซื้อสินค้า</button>
     </form>
@@ -306,7 +372,8 @@ function pageCheckout(slug, d, error = '') {
 function pageConfirm(slug, d) {
   const p = productBySlug(slug);
   if (!p || !d) return pageNotFound();
-  const subtotal = priceOf(p).price * d.qty;
+  const vr = hasVariants(p) ? p.variants.find((x) => x.id === d.variant) : null;
+  const subtotal = priceFor(p, vr).price * d.qty;
   const total = subtotal + p.shipping;
   const cod = d.method === 'cod';
   const dueNow = cod ? p.shipping : total;
@@ -319,7 +386,7 @@ function pageConfirm(slug, d) {
     <h2 class="section-title">ยืนยันการสั่งซื้อ</h2>
     <table>
       <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
-      <tr><td>${esc(p.name)}</td><td class="right">${d.qty}</td><td class="right">${baht(subtotal)}</td></tr>
+      <tr><td>${esc(p.name)}${vr ? ' (' + esc(vr.name) + ')' : ''}</td><td class="right">${d.qty}</td><td class="right">${baht(subtotal)}</td></tr>
       <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(p.shipping)}</td></tr>
       <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(total)}</th></tr>
     </table>
@@ -444,7 +511,7 @@ async function confirmOrder(e, slug) {
   if (hasVariants(p) && (!vr || draft.qty > variantAvail(vr))) return alert('สินค้าไม่พอแล้ว กรุณาเริ่มสั่งซื้อใหม่');
 
   const slip = await readAsDataUrl(file);
-  const unit = priceOf(p).price;
+  const unit = priceFor(p, vr).price;
   const subtotal = unit * draft.qty;
   const total = subtotal + p.shipping;
   const cod = draft.method === 'cod';
