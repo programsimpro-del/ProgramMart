@@ -464,7 +464,6 @@ function pageTransfer(slug, d, error = '') {
         <input type="file" name="slip" accept="image/jpeg,image/png,image/webp" hidden onchange="previewSlip(this)">
         <span class="sicon">+</span>
         <b>${d.slip ? 'เปลี่ยนสลิปการโอน' : 'แนบสลิปการโอน'}</b>
-        <small>JPG, PNG หรือ WEBP ไม่เกิน 2 MB</small>
       </label>
       <img id="slipPreview" class="slip-preview" ${d.slip ? `src="${esc(d.slip)}"` : ''} style="${d.slip ? '' : 'display:none'}" alt="">
       <button class="btn" type="submit" style="margin-top:16px">ถัดไป กรอกที่อยู่จัดส่ง</button>
