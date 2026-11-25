@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ร้านของฉัน</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Noto Sans Thai",system-ui,sans-serif;color:#1f1f1f;background:#fff;font-size:15px;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit}
+
+  /* ---------- หัวเว็บ ---------- */
+  .topbar{height:72px;padding:0 64px;border-bottom:0.5px solid #e4e4e0;display:flex;align-items:center;justify-content:space-between;gap:24px;position:sticky;top:0;background:#fff;z-index:10}
+  .brand{font-size:20px;font-weight:500}
+  .nav{display:flex;gap:32px;font-size:15px;color:#5f5e5a}
+  .nav a:hover{color:#1f1f1f}
+  .admin-link{font-size:14px;color:#5f5e5a}
+
+  /* ---------- เนื้อหา ---------- */
+  .wrap{padding:32px 64px;max-width:1280px;margin:0 auto}
+  .narrow{max-width:620px}
+  .crumb{font-size:14px;color:#5f5e5a;margin-bottom:24px}
+  .section-title{font-size:20px;font-weight:500;margin:0 0 20px}
+  .muted{color:#5f5e5a;font-size:14px}
+  .err{color:#a32d2d;font-size:14px;margin:0 0 12px}
+
+  /* ---------- การ์ดสินค้า ---------- */
+  .pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+  .pill{font-size:14px;padding:6px 14px;border:0.5px solid #b4b2a9;border-radius:999px;color:#1f1f1f}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:24px}
+  .pcard{display:block}
+  .thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#f1efe8;display:flex;align-items:center;justify-content:center;color:#5f5e5a;font-size:14px}
+  img.thumb{display:block}
+  .pname{font-size:15px;margin-top:10px;min-height:46px}
+  .price{font-size:16px;font-weight:500;color:#993c1d}
+  .old{font-size:13px;color:#888780;text-decoration:line-through;margin-left:8px}
+  .badge{font-size:12px;background:#faece7;color:#712b13;padding:2px 8px;border-radius:8px;margin-left:8px}
+  .stock{display:inline-block;font-size:13px;color:#27500a;background:#eaf3de;padding:3px 10px;border-radius:8px;margin-top:6px}
+  .stock.out{color:#791f1f;background:#fcebeb}
+
+  /* ---------- หน้าสินค้า ---------- */
+  .detail{display:flex;gap:64px;align-items:flex-start;flex-wrap:wrap}
+  .detail-img{width:560px;max-width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;background:#f1efe8}
+  .info{flex:1;min-width:300px;display:flex;flex-direction:column;gap:18px}
+  .info h1{margin:0;font-size:32px;font-weight:500;line-height:1.3}
+  .price-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .price-big{font-size:36px;font-weight:500;color:#993c1d}
+  .price-old{font-size:18px;color:#888780;text-decoration:line-through}
+  .btns{display:flex;flex-direction:column;gap:12px;margin-top:8px}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:8px;font-size:16px;font-weight:500;border:0;cursor:pointer;width:100%;color:#fff;background:#1f1f1f;text-align:center}
+  .btn:hover{opacity:.92}
+  .btn[disabled]{background:#c9c8c1;cursor:not-allowed}
+  .btn.shopee{background:#EE4D2D}
+  .btn.tiktok{background:#000}
+  .logo-slot{display:inline-block;width:0}
+  .disclosure{margin:0;font-size:12px;color:#888780}
+  .desc{border-top:0.5px solid #e4e4e0;padding-top:20px;font-size:15px;line-height:1.7;color:#444441;white-space:pre-line}
+
+  /* ---------- ขั้นตอนสั่งซื้อ ---------- */
+  .step{font-size:13px;color:#5f5e5a;margin-bottom:6px}
+  .field-label{display:block;font-size:14px;font-weight:500;margin:18px 0 8px}
+  .field input,.field textarea{width:100%;padding:12px 14px;border:0.5px solid #b4b2a9;border-radius:8px;font-size:15px;font-family:inherit;background:#fff;color:#1f1f1f}
+  .field input:focus,.field textarea:focus{outline:1.5px solid #1f1f1f;border-color:transparent}
+  .option{display:flex;gap:12px;align-items:flex-start;border:0.5px solid #b4b2a9;border-radius:8px;padding:14px;margin-top:10px;cursor:pointer}
+  .option:has(input:checked){border:1.5px solid #1f1f1f}
+  .option input{margin-top:4px}
+  .option b{display:block;font-weight:500}
+  .option span{font-size:13px;color:#5f5e5a}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  td,th{border-bottom:0.5px solid #e4e4e0;padding:10px 4px;text-align:left;font-size:14px;vertical-align:top}
+  th{font-weight:500}
+  .right{text-align:right}
+  .box{background:#f7f6f2;border-radius:8px;padding:16px;margin:20px 0;font-size:14px;line-height:1.8}
+  .box strong{font-weight:500;color:#993c1d}
+  .bank{white-space:pre-line;color:#5f5e5a;font-size:13px;margin-top:8px}
+  .slip-preview{width:100%;max-height:260px;object-fit:contain;border-radius:8px;margin-top:12px;border:0.5px solid #e4e4e0}
+  .back-link{display:inline-block;margin-top:20px;font-size:14px;color:#5f5e5a;text-decoration:underline}
+
+  @media (max-width:820px){
+    .topbar{padding:12px 20px;height:auto;flex-wrap:wrap}
+    .nav{display:none}
+    .wrap{padding:24px 20px}
+    .detail-img{width:100%}
+    .info h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#/">ร้านของฉัน</a>
+  <nav class="nav">
+    <a href="#/">หน้าแรก</a>
+    <a href="#/">สินค้าทั้งหมด</a>
+    <a href="#/">โปรโมชัน</a>
+    <a href="#/">ติดต่อเรา</a>
+  </nav>
+  <a class="admin-link" href="admin.html">หลังบ้าน</a>
+</header>
+
+<div id="app"></div>
+
+<script>
+/*
+ * หน้าร้าน (เวอร์ชันตัวอย่าง): ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น
+ * ลิงก์ Shopee / TikTok ในข้อมูลตัวอย่างเป็นค่าว่าง จึงยังไม่แสดงปุ่ม ให้ใส่ลิงก์พันธมิตรจริงในหลังบ้าน
+ */
+const KEY = 'shop-front-v1';
+const SHIPPING_DEFAULT = 40;
+const HOSTS = {
+  shopee: ['shopee.co.th', 's.shopee.co.th', 'shope.ee'],
+  tiktok: ['tiktok.com', 'vt.tiktok.com', 'shop.tiktok.com'],
+};
+const CHANNEL_LABEL = { shopee: 'Shopee', tiktok: 'TikTok' };
+
+let data = load();
+let draft = null; /* ข้อมูลจากขั้นตอนที่ 2 ส่งต่อไปขั้นตอนที่ 3 */
+
+const $app = () => document.getElementById('app');
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const baht = (n) => '฿' + Number(n).toLocaleString('th-TH');
+const nowBkk = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 16);
+
+function seed() {
+  return {
+    bank: 'ธนาคารตัวอย่าง เลขที่บัญชี 000-0-00000-0 ชื่อบัญชี ร้านของฉัน',
+    categories: [
+      { id: 1, name: 'เสื้อผ้า', slug: 'clothes' },
+      { id: 2, name: 'ขนม', slug: 'snacks' },
+      { id: 3, name: 'น้ำหอม', slug: 'perfume' },
+    ],
+    products: [
+      { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 12, reserved: 0, image: '', discount: { kind: 'fixed', value: 300 }, links: {} },
+      { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
+      { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
+    ],
+    orders: [],
+    nextOrderId: 1,
+  };
+}
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { return seed(); }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+/* ---------- ราคาและสต๊อก ---------- */
+function priceOf(p) {
+  let price = p.price;
+  const d = p.discount;
+  if (d) {
+    const v = d.kind === 'percent' ? Math.floor((p.price * (100 - d.value)) / 100) : Math.max(0, p.price - d.value);
+    if (v < price) price = v;
+  }
+  const discounted = price < p.price;
+  return { original: p.price, price, discounted, pct: discounted && p.price ? Math.round((1 - price / p.price) * 100) : 0 };
+}
+const available = (p) => Math.max(0, p.onHand - p.reserved);
+const catById = (id) => data.categories.find((c) => c.id === id);
+const productBySlug = (slug) => data.products.find((p) => p.slug === slug);
+function allowedLink(ch, raw) {
+  let u;
+  try { u = new URL(raw); } catch { return false; }
+  if (u.protocol !== 'https:') return false;
+  return HOSTS[ch].some((h) => u.hostname === h || u.hostname.endsWith('.' + h));
+}
+const extChannels = (p) => ['shopee', 'tiktok'].filter((ch) => !p.links[ch] || allowedLink(ch, p.links[ch]));
+
+/* ---------- ชิ้นส่วนแสดงผล ---------- */
+function priceHtml(p) {
+  const pr = priceOf(p);
+  if (!pr.discounted) return `<span class="price">${baht(pr.price)}</span>`;
+  return `<span class="price">${baht(pr.price)}</span><span class="old">${baht(pr.original)}</span><span class="badge">ลด ${pr.pct}%</span>`;
+}
+const stockHtml = (p) => available(p) > 0
+  ? `<span class="stock">คงเหลือในร้าน ${available(p)} ชิ้น</span>`
+  : `<span class="stock out">สินค้าหมดในร้าน</span>`;
+const thumb = (p) => p.image ? `<img class="thumb" src="${esc(p.image)}" alt="">` : `<div class="thumb">ยังไม่มีรูปสินค้า</div>`;
+const stepLabel = (n) => `<div class="step">ขั้นตอนที่ ${n} จาก 3</div>`;
+
+/* ---------- หน้าต่างๆ ---------- */
+function pageHome() {
+  const pills = data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('');
+  return `<div class="wrap">
+    <div class="pills">${pills}</div>
+    <h2 class="section-title">สินค้าทั้งหมด</h2>
+    ${grid(data.products)}
+  </div>`;
+}
+function grid(list) {
+  if (!list.length) return '<p class="muted">ยังไม่มีสินค้าให้แสดง</p>';
+  return `<div class="grid">${list.map((p) => `<a class="pcard" href="#/p/${esc(p.slug)}">${thumb(p)}
+    <div class="pname">${esc(p.name)}</div><div>${priceHtml(p)}</div>${stockHtml(p)}</a>`).join('')}</div>`;
+}
+function pageCategory(slug) {
+  const cat = data.categories.find((c) => c.slug === slug);
+  if (!cat) return pageNotFound();
+  return `<div class="wrap">
+    <div class="pills">${data.categories.map((c) => `<a class="pill" href="#/c/${esc(c.slug)}">${esc(c.name)}</a>`).join('')}</div>
+    <h2 class="section-title">${esc(cat.name)}</h2>
+    ${grid(data.products.filter((p) => p.categoryId === cat.id))}
+  </div>`;
+}
+function pageProduct(slug) {
+  const p = productBySlug(slug);
+  if (!p) return pageNotFound();
+  const pr = priceOf(p);
+  const cat = catById(p.categoryId);
+  const ext = extChannels(p);
+  const storeBtn = available(p) > 0
+    ? `<a class="btn" href="#/p/${esc(p.slug)}/checkout">สั่งซื้อสินค้าราคา ${baht(pr.price)}</a>`
+    : `<button class="btn" disabled>สินค้าหมดในร้าน</button>`;
+  const extBtns = ext.map((ch) => `<a class="btn ${ch}" href="${esc(p.links[ch] || '#')}" target="_blank" rel="sponsored nofollow noopener" onclick="trackClick(${p.id},'${ch}')"><span class="logo-slot"></span>สั่งซื้อผ่าน ${CHANNEL_LABEL[ch]}</a>`).join('');
+  const disclosure = ext.length ? '<p class="disclosure">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</p>' : '';
+  return `<div class="wrap">
+    <div class="crumb">หน้าแรก${cat ? ' / ' + esc(cat.name) : ''} / ${esc(p.name)}</div>
+    <div class="detail">
+      ${p.image ? `<img class="detail-img" src="${esc(p.image)}" alt="">` : `<div class="detail-img thumb">รูปสินค้าจากหลังบ้าน</div>`}
+      <div class="info">
+        <div>
+          <h1>${esc(p.name)}</h1>
+          ${cat ? `<p class="muted" style="margin:8px 0 0">หมวด ${esc(cat.name)}</p>` : ''}
+        </div>
+        <div class="price-row">
+          <span class="price-big">${baht(pr.price)}</span>
+          ${pr.discounted ? `<span class="price-old">${baht(pr.original)}</span><span class="badge">ลด ${pr.pct}%</span>` : ''}
+        </div>
+        <div>${stockHtml(p)}</div>
+        <div class="btns">
+          ${storeBtn}
+          ${extBtns}
+          ${disclosure}
+        </div>
+        <div class="desc">${esc(p.description)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ขั้นตอนที่ 2: ข้อมูลผู้รับและวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
+function pageCheckout(slug, d, error = '') {
+  const p = productBySlug(slug);
+  if (!p) return pageNotFound();
+  if (available(p) < 1) { location.hash = '#/p/' + slug; return ''; }
+  const v = d || { qty: 1, name: '', phone: '', address: '', note: '', method: 'transfer' };
+  return `<div class="wrap narrow">
+    ${stepLabel(2)}
+    <h2 class="section-title" style="margin-bottom:4px">${esc(p.name)}</h2>
+    <p class="muted" style="margin:0 0 12px">${baht(priceOf(p).price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping)}</p>
+    ${error ? `<p class="err">${esc(error)}</p>` : ''}
+    <form onsubmit="goStep3(event,'${esc(p.slug)}')">
+      <label class="field-label">จำนวน (คงเหลือ ${available(p)} ชิ้น)</label>
+      <div class="field"><input name="qty" type="number" min="1" max="${Math.min(50, available(p))}" value="${v.qty}" required></div>
+      <label class="field-label">ชื่อผู้รับ</label>
+      <div class="field"><input name="customer_name" value="${esc(v.name)}" required></div>
+      <label class="field-label">เบอร์โทร</label>
+      <div class="field"><input name="phone" value="${esc(v.phone)}" required></div>
+      <label class="field-label">ที่อยู่จัดส่ง</label>
+      <div class="field"><textarea name="address" rows="3" required>${esc(v.address)}</textarea></div>
+      <label class="field-label">หมายเหตุ</label>
+      <div class="field"><textarea name="note" rows="2">${esc(v.note)}</textarea></div>
+      <label class="field-label">วิธีชำระเงิน</label>
+      <label class="option"><input type="radio" name="payment_method" value="transfer" ${v.method === 'transfer' ? 'checked' : ''}>
+        <div><b>โอนชำระเต็มจำนวน</b><span>สินค้า + ค่าจัดส่ง</span></div></label>
+      <label class="option"><input type="radio" name="payment_method" value="cod" ${v.method === 'cod' ? 'checked' : ''}>
+        <div><b>เก็บเงินปลายทาง</b><span>โอนค่าจัดส่ง ${baht(p.shipping)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ</span></div></label>
+      <button class="btn" type="submit" style="margin-top:24px">สั่งซื้อสินค้า</button>
+    </form>
+  </div>`;
+}
+
+/* ขั้นตอนที่ 3: สรุปยอด แนบสลิป และยืนยันในหน้าเดียว */
+function pageConfirm(slug, d) {
+  const p = productBySlug(slug);
+  if (!p || !d) return pageNotFound();
+  const subtotal = priceOf(p).price * d.qty;
+  const total = subtotal + p.shipping;
+  const cod = d.method === 'cod';
+  const dueNow = cod ? p.shipping : total;
+  const onDelivery = cod ? subtotal : 0;
+  const payLines = cod
+    ? `<div>ชำระตอนนี้ (ค่าจัดส่ง) <strong>${baht(dueNow)}</strong></div><div>ชำระตอนรับของ (ค่าสินค้า) <strong>${baht(onDelivery)}</strong></div>`
+    : `<div>ชำระตอนนี้ <strong>${baht(dueNow)}</strong></div>`;
+  return `<div class="wrap narrow">
+    ${stepLabel(3)}
+    <h2 class="section-title">ยืนยันการสั่งซื้อ</h2>
+    <table>
+      <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
+      <tr><td>${esc(p.name)}</td><td class="right">${d.qty}</td><td class="right">${baht(subtotal)}</td></tr>
+      <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(p.shipping)}</td></tr>
+      <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(total)}</th></tr>
+    </table>
+    <div class="box">${payLines}<div class="bank">${esc(data.bank)}</div></div>
+    <form onsubmit="confirmOrder(event,'${esc(p.slug)}')">
+      <label class="field-label">แนบสลิปการโอน (JPG, PNG หรือ WEBP ไม่เกิน 2 MB)</label>
+      <div class="field"><input type="file" name="slip" accept="image/jpeg,image/png,image/webp" required onchange="previewSlip(this)"></div>
+      <img id="slipPreview" class="slip-preview" style="display:none" alt="">
+      <button class="btn" type="submit" style="margin-top:24px">ยืนยันการสั่งซื้อ</button>
+    </form>
+  </div>`;
+}
+
+function pageOrder(id) {
+  const o = data.orders.find((x) => x.id === id);
+  if (!o) return pageNotFound();
+  const statusText = { pending: 'รอการตรวจสอบการชำระเงิน', paid: 'ชำระเงินแล้ว', cancelled: 'ยกเลิกแล้ว' };
+  const cod = o.payment === 'cod';
+  return `<div class="wrap narrow">
+    <h2 class="section-title">คำสั่งซื้อ #${o.id}</h2>
+    <p class="muted" style="margin-top:-12px">สถานะ: ${statusText[o.status]} · ${cod ? 'เก็บเงินปลายทาง' : 'โอนชำระเต็มจำนวน'}</p>
+    <table>
+      <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
+      ${o.items.map((i) => `<tr><td>${esc(i.name)}</td><td class="right">${i.qty}</td><td class="right">${baht(i.unitPrice * i.qty)}</td></tr>`).join('')}
+      <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(o.shipping)}</td></tr>
+      <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(o.total)}</th></tr>
+    </table>
+    ${o.status === 'pending' ? `<div class="box">${cod
+      ? `โอนค่าจัดส่ง <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง เมื่อได้รับสินค้าให้ชำระค่าสินค้า <strong>${baht(o.onDelivery)}</strong> กับพนักงานส่ง`
+      : `โอนเงิน <strong>${baht(o.dueNow)}</strong> ตามรายละเอียดด้านล่าง`}
+      <div>ทีมงานจะตรวจสลิปและยืนยันคำสั่งซื้อให้</div>
+      <div class="bank">${esc(data.bank)}</div></div>` : ''}
+    <a class="back-link" href="#/">กลับหน้าแรก</a>
+  </div>`;
+}
+function pageNotFound() {
+  return `<div class="wrap"><h2 class="section-title">ไม่พบหน้าที่ต้องการ</h2><a class="back-link" href="#/">กลับหน้าแรก</a></div>`;
+}
+
+/* ---------- การทำงานของฟอร์ม ---------- */
+function goStep3(e, slug) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const p = productBySlug(slug);
+  const d = {
+    qty: parseInt(f.get('qty'), 10),
+    name: String(f.get('customer_name') || '').trim(),
+    phone: String(f.get('phone') || '').trim(),
+    address: String(f.get('address') || '').trim(),
+    note: String(f.get('note') || '').trim(),
+    method: f.get('payment_method') === 'cod' ? 'cod' : 'transfer',
+  };
+  let err = '';
+  if (!p) err = 'ไม่พบสินค้า';
+  else if (!(d.qty >= 1 && d.qty <= 50)) err = 'จำนวนต้องอยู่ระหว่าง 1 ถึง 50';
+  else if (d.qty > available(p)) err = `สินค้าเหลือ ${available(p)} ชิ้น`;
+  else if (!d.name) err = 'กรุณากรอกชื่อผู้รับ';
+  else if (!/^[0-9+\-\s]{9,15}$/.test(d.phone)) err = 'กรุณากรอกเบอร์โทรที่ถูกต้อง';
+  else if (d.address.length < 10) err = 'กรุณากรอกที่อยู่จัดส่งให้ครบ';
+  if (err) {
+    $app().innerHTML = pageCheckout(slug, d, err);
+    return;
+  }
+  draft = d;
+  location.hash = `#/p/${slug}/confirm`;
+}
+
+function previewSlip(input) {
+  const img = document.getElementById('slipPreview');
+  const file = input.files && input.files[0];
+  if (!file) { img.style.display = 'none'; return; }
+  img.src = URL.createObjectURL(file);
+  img.style.display = 'block';
+}
+
+function readAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function confirmOrder(e, slug) {
+  e.preventDefault();
+  const p = productBySlug(slug);
+  const f = e.target.elements.slip;
+  const file = f && f.files && f.files[0];
+  if (!p || !draft) return alert('ข้อมูลไม่ครบ กรุณาเริ่มสั่งซื้อใหม่');
+  if (!file) return alert('กรุณาแนบสลิปการโอน');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return alert('รองรับเฉพาะไฟล์ JPG, PNG และ WEBP');
+  if (file.size > 2 * 1024 * 1024) return alert('ไฟล์สลิปต้องไม่เกิน 2 MB');
+  if (draft.qty > available(p)) return alert('สินค้าไม่พอแล้ว กรุณาเริ่มสั่งซื้อใหม่');
+
+  const slip = await readAsDataUrl(file);
+  const unit = priceOf(p).price;
+  const subtotal = unit * draft.qty;
+  const total = subtotal + p.shipping;
+  const cod = draft.method === 'cod';
+  p.reserved += draft.qty;
+  const order = {
+    id: data.nextOrderId++,
+    name: draft.name, phone: draft.phone, address: draft.address, note: draft.note,
+    items: [{ productId: p.id, name: p.name, qty: draft.qty, unitPrice: unit }],
+    shipping: p.shipping,
+    total,
+    payment: draft.method,
+    dueNow: cod ? p.shipping : total,
+    onDelivery: cod ? subtotal : 0,
+    slip,
+    status: 'pending',
+    createdAt: nowBkk(),
+  };
+  data.orders.unshift(order);
+  try {
+    save();
+  } catch {
+    p.reserved -= draft.qty;
+    data.orders.shift();
+    data.nextOrderId--;
+    return alert('บันทึกไม่สำเร็จ สลิปอาจใหญ่เกินพื้นที่ของเบราว์เซอร์ ลองใช้ไฟล์ที่เล็กลง');
+  }
+  draft = null;
+  location.hash = '#/order/' + order.id;
+}
+
+function trackClick(id, ch) {
+  const p = data.products.find((x) => x.id === id);
+  if (p) { p.clicks = p.clicks || {}; p.clicks[ch] = (p.clicks[ch] || 0) + 1; save(); }
+}
+
+/* ---------- เส้นทาง ---------- */
+function render() {
+  data = load();
+  const h = location.hash || '#/';
+  let html;
+  let m;
+  if ((m = h.match(/^#\/p\/([^/]+)\/checkout$/))) html = pageCheckout(m[1], draft);
+  else if ((m = h.match(/^#\/p\/([^/]+)\/confirm$/))) html = pageConfirm(m[1], draft);
+  else if ((m = h.match(/^#\/p\/([^/]+)$/))) html = pageProduct(m[1]);
+  else if ((m = h.match(/^#\/c\/([^/]+)$/))) html = pageCategory(m[1]);
+  else if ((m = h.match(/^#\/order\/(\d+)$/))) html = pageOrder(Number(m[1]));
+  else if (h === '#/' || h === '') html = pageHome();
+  else html = pageNotFound();
+  $app().innerHTML = html;
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', render);
+render();
+</script>
+</body>
+</html>
