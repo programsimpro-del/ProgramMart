@@ -180,6 +180,8 @@ function priceFor(p, vr) {
   return { original: base, price, discounted, pct: discounted && base ? Math.round((1 - price / base) * 100) : 0 };
 }
 function priceOf(p) { return priceFor(p, null); }
+/* ค่าจัดส่งเก็บเฉพาะเก็บเงินปลายทาง ถ้าโอนเต็มจำนวนจัดส่งฟรี */
+function shippingFor(p, method) { return method === 'cod' ? p.shipping : 0; }
 const variantAvail = (v) => Math.max(0, v.onHand - v.reserved);
 const hasVariants = (p) => Array.isArray(p.variants) && p.variants.length > 0;
 const available = (p) => hasVariants(p)
@@ -273,16 +275,17 @@ function summaryFor(p, vr, qty, method) {
   const listTotal = pr.original * qty;
   const subtotal = pr.price * qty;
   const discount = listTotal - subtotal;
-  const total = subtotal + p.shipping;
   const cod = method === 'cod';
-  return { pr, listTotal, discount, subtotal, total, cod, dueNow: cod ? p.shipping : total, onDelivery: cod ? subtotal : 0 };
+  const shipping = shippingFor(p, method);
+  const total = subtotal + shipping;
+  return { pr, listTotal, discount, subtotal, shipping, total, cod, dueNow: cod ? shipping : total, onDelivery: cod ? subtotal : 0 };
 }
 function summaryHtml(p, vr, qty, method) {
   const s = summaryFor(p, vr, qty, method);
   return `<div class="summary">
     <div class="srow"><span>ราคาสินค้า ${qty} ชิ้น</span><span>${baht(s.listTotal)}</span></div>
     ${s.discount > 0 ? `<div class="srow disc"><span>ส่วนลด${s.pr.pct ? ' ' + s.pr.pct + '%' : ''}</span><span>-${baht(s.discount)}</span></div>` : ''}
-    <div class="srow"><span>ค่าจัดส่ง</span><span>${baht(p.shipping)}</span></div>
+    ${s.cod ? `<div class="srow"><span>ค่าจัดส่ง</span><span>${baht(s.shipping)}</span></div>` : ''}
     <div class="srow total"><span>รวมทั้งสิ้น</span><span>${baht(s.total)}</span></div>
     <div class="srow pay"><span>${s.cod ? 'ชำระตอนนี้ (ค่าจัดส่ง)' : 'ชำระตอนนี้'}</span><span>${baht(s.dueNow)}</span></div>
     ${s.cod ? `<div class="srow pay"><span>ชำระตอนรับของ (ค่าสินค้า)</span><span>${baht(s.onDelivery)}</span></div>` : ''}
@@ -374,9 +377,10 @@ function pageConfirm(slug, d) {
   if (!p || !d) return pageNotFound();
   const vr = hasVariants(p) ? p.variants.find((x) => x.id === d.variant) : null;
   const subtotal = priceFor(p, vr).price * d.qty;
-  const total = subtotal + p.shipping;
   const cod = d.method === 'cod';
-  const dueNow = cod ? p.shipping : total;
+  const shipping = shippingFor(p, d.method);
+  const total = subtotal + shipping;
+  const dueNow = cod ? shipping : total;
   const onDelivery = cod ? subtotal : 0;
   const payLines = cod
     ? `<div>ชำระตอนนี้ (ค่าจัดส่ง) <strong>${baht(dueNow)}</strong></div><div>ชำระตอนรับของ (ค่าสินค้า) <strong>${baht(onDelivery)}</strong></div>`
@@ -387,7 +391,7 @@ function pageConfirm(slug, d) {
     <table>
       <tr><th>สินค้า</th><th class="right">จำนวน</th><th class="right">ราคา</th></tr>
       <tr><td>${esc(p.name)}${vr ? ' (' + esc(vr.name) + ')' : ''}</td><td class="right">${d.qty}</td><td class="right">${baht(subtotal)}</td></tr>
-      <tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(p.shipping)}</td></tr>
+      ${cod ? `<tr><td colspan="2">ค่าจัดส่ง</td><td class="right">${baht(shipping)}</td></tr>` : ''}
       <tr><th colspan="2">รวมทั้งสิ้น</th><th class="right">${baht(total)}</th></tr>
     </table>
     <div class="box">${payLines}<div class="bank">${esc(data.bank)}</div></div>
@@ -513,17 +517,18 @@ async function confirmOrder(e, slug) {
   const slip = await readAsDataUrl(file);
   const unit = priceFor(p, vr).price;
   const subtotal = unit * draft.qty;
-  const total = subtotal + p.shipping;
   const cod = draft.method === 'cod';
+  const shipping = shippingFor(p, draft.method);
+  const total = subtotal + shipping;
   if (vr) vr.reserved += draft.qty; else p.reserved += draft.qty;
   const order = {
     id: data.nextOrderId++,
     name: draft.name, phone: draft.phone, address: draft.address, note: draft.note,
     items: [{ productId: p.id, name: vr ? `${p.name} (${vr.name})` : p.name, qty: draft.qty, unitPrice: unit }],
-    shipping: p.shipping,
+    shipping,
     total,
     payment: draft.method,
-    dueNow: cod ? p.shipping : total,
+    dueNow: cod ? shipping : total,
     onDelivery: cod ? subtotal : 0,
     slip,
     status: 'pending',
