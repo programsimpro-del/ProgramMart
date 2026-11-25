@@ -117,6 +117,10 @@
 .variant-wrap.slider .variants::-webkit-scrollbar{display:none}
 .variant-wrap.slider .variant{flex:0 0 150px;scroll-snap-align:start}
 .vnav{flex:0 0 36px;height:36px;border-radius:50%;border:0.5px solid #b4b2a9;background:#fff;font-size:20px;cursor:pointer;line-height:1;padding:0}
+.step-img{max-width:none;width:100vw;max-height:80vh;aspect-ratio:auto;height:auto;border-radius:0;margin:0 calc(50% - 50vw) 16px;object-fit:cover}
+.step-img.thumb{height:min(100vw,80vh);aspect-ratio:auto}
+#stockLabel{display:block;text-align:center}
+.qty-row{justify-content:center}
 </style>
 </head>
 <body>
@@ -139,7 +143,7 @@
  * หน้าร้าน (เวอร์ชันตัวอย่าง): ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น
  * ลิงก์ Shopee / TikTok ในข้อมูลตัวอย่างเป็นค่าว่าง จึงยังไม่แสดงปุ่ม ให้ใส่ลิงก์พันธมิตรจริงในหลังบ้าน
  */
-const KEY = 'shop-front-v2';
+const KEY = 'shop-front-v3';
 const SHIPPING_DEFAULT = 40;
 const HOSTS = {
   shopee: ['shopee.co.th', 's.shopee.co.th', 'shope.ee'],
@@ -171,6 +175,9 @@ function seed() {
       { id: 1, name: 'กระเป๋าผ้าแคนวาส รุ่นมินิมอล', slug: 'canvas-bag', categoryId: 1, description: 'กระเป๋าผ้าแคนวาสน้ำหนักเบา ใส่ได้ทั้งของใช้ประจำวันและโน้ตบุ๊กขนาด 13 นิ้ว มีซิปปิดด้านบนและกระเป๋าด้านในหนึ่งช่อง', price: 1290, shipping: SHIPPING_DEFAULT, onHand: 0, reserved: 0, image: '', discount: { kind: 'fixed', value: 300 }, links: {}, variants: [
         { id: 'black', name: 'สีดำ', image: '', price: 1290, onHand: 6, reserved: 0 },
         { id: 'brown', name: 'สีน้ำตาล', image: '', price: 1290, onHand: 6, reserved: 0 },
+        { id: 'white', name: 'สีขาว', image: '', price: 1290, onHand: 6, reserved: 0 },
+        { id: 'navy', name: 'สีกรมท่า', image: '', price: 1290, onHand: 6, reserved: 0 },
+        { id: 'green', name: 'สีเขียว', image: '', price: 1290, onHand: 6, reserved: 0 },
       ] },
       { id: 2, name: 'ขนมปังกรอบ รสนม', slug: 'milk-cracker', categoryId: 2, description: 'ขนาด 100 กรัม', price: 35, shipping: SHIPPING_DEFAULT, onHand: 50, reserved: 0, image: '', discount: null, links: {} },
       { id: 3, name: 'น้ำหอมกลิ่นไม้ซีดาร์', slug: 'cedar-perfume', categoryId: 3, description: 'ขนาด 30 มล.', price: 450, shipping: SHIPPING_DEFAULT, onHand: 5, reserved: 0, image: '', discount: null, links: {} },
