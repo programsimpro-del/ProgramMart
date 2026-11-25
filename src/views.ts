@@ -2,6 +2,7 @@ import { esc, baht } from './util';
 import type { Category, ProductView, LinkInfo } from './db';
 import type { Channel } from './links';
 import { CHANNELS } from './links';
+import { amountsFor, type CheckoutInput } from './checkout';
 
 type Links = Partial<Record<Channel, LinkInfo>>;
 
@@ -110,32 +111,33 @@ export function categoryView(cat: Category, cats: Category[], products: ProductV
 ${products.length ? `<div class="grid">${products.map(productCard).join('')}</div>` : '<p class="muted">ยังไม่มีสินค้าในหมวดนี้</p>'}`;
 }
 
-export function productView(p: ProductView, links: Links, turnstileKey = ''): string {
+const BRAND: Record<Channel, { label: string; bg: string; fg: string }> = {
+  shopee: { label: 'Shopee', bg: '#EE4D2D', fg: '#ffffff' },
+  tiktok: { label: 'TikTok', bg: '#000000', fg: '#ffffff' },
+};
+
+function stepBar(step: 2 | 3): string {
+  return `<p class="muted" style="margin:0 0 12px">ขั้นตอนที่ ${step} จาก 3</p>`;
+}
+
+/** หน้าสินค้า (ขั้นตอนที่ 1): ปุ่มสั่งซื้อที่ร้าน และปุ่มพันธมิตร Shopee / TikTok ที่ใช้โลโก้และสีของแบรนด์ */
+export function productView(p: ProductView, links: Links): string {
   const img = p.cover
     ? `<img src="${esc(p.cover)}" alt="${esc(p.name)}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px">`
     : `<div class="thumb" style="border-radius:12px;height:100%;min-height:360px">ยังไม่มีรูปสินค้า</div>`;
 
-  const shopForm =
+  const storeBtn =
     p.available > 0
-      ? `<form method="post" action="/p/${esc(p.slug)}/order" style="margin-top:12px">
-  <label>จำนวน (คงเหลือ ${p.available} ชิ้น)</label>
-  <input name="qty" type="number" min="1" max="${Math.min(50, p.available)}" value="1" required>
-  <label>ชื่อผู้รับ</label><input name="customer_name" required>
-  <label>เบอร์โทร</label><input name="phone" required>
-  <label>หมายเหตุ</label><textarea name="note" rows="2"></textarea>
-  ${
-    turnstileKey
-      ? `<div class="cf-turnstile" data-sitekey="${esc(turnstileKey)}" style="margin-top:12px"></div>
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>`
-      : ''
-  }
-  <button class="btn" type="submit" style="margin-top:12px;width:100%">ซื้อที่ร้าน</button>
-</form>`
-      : `<button class="btn" disabled style="margin-top:12px;width:100%">ซื้อที่ร้าน (สินค้าหมด)</button>`;
+      ? `<a class="btn" href="/p/${esc(p.slug)}/checkout" style="margin-top:12px;width:100%">สั่งซื้อสินค้าราคา ${baht(p.pricing.price)}</a>`
+      : `<button class="btn" disabled style="margin-top:12px;width:100%">สินค้าหมดในร้าน</button>`;
 
   const extern = CHANNELS.filter((ch) => links[ch]?.active);
   const externHtml = extern
-    .map((ch) => `<a class="btn alt" href="/go/${ch}/${p.id}">ซื้อผ่าน ${ch === 'shopee' ? 'Shopee' : 'TikTok'}</a>`)
+    .map((ch) => {
+      const b = BRAND[ch];
+      // ช่องโลโก้: ใส่ <img> ของโลโก้แบรนด์ในตำแหน่งนี้ภายหลัง
+      return `<a class="btn" href="/go/${ch}/${p.id}" style="margin-top:8px;width:100%;background:${b.bg};border-color:${b.bg};color:${b.fg}"><span class="logo-slot" data-brand="${ch}" style="display:inline-block;min-width:4px"></span>สั่งซื้อผ่าน ${b.label}</a>`;
+    })
     .join('');
   const disclosure = extern.length
     ? `<p class="muted" style="font-size:12px">ปุ่ม Shopee และ TikTok เป็นลิงก์พันธมิตร ราคาและสต๊อกอาจต่างกันตามแพลตฟอร์ม</p>`
@@ -148,38 +150,126 @@ export function productView(p: ProductView, links: Links, turnstileKey = ''): st
     ${p.category_name ? `<div class="muted">หมวด ${esc(p.category_name)}</div>` : ''}
     <div style="margin:16px 0;font-size:24px">${priceHtml(p)}</div>
     <div>${stockHtml(p)}</div>
-    ${shopForm}
+    ${storeBtn}
     ${externHtml}
     ${disclosure}
-    ${!p.available && !extern.length ? '<p class="muted">ติดต่อสอบถามทางร้านได้โดยตรง</p>' : ''}
     <div style="border-top:1px solid #e4e4e0;margin-top:20px;padding-top:16px;line-height:1.7;white-space:pre-line">${esc(p.description)}</div>
   </div>
 </div>`;
 }
 
+/** ขั้นตอนที่ 2: กรอกข้อมูลผู้รับและเลือกวิธีชำระ (ไม่มีปุ่มย้อนกลับ) */
+export function checkoutStep2View(p: ProductView, input: CheckoutInput, error = ''): string {
+  const max = Math.min(50, p.available);
+  return `${stepBar(2)}
+<h1 style="font-size:24px;font-weight:500;margin:0 0 4px">${esc(p.name)}</h1>
+<p class="muted" style="margin:0 0 12px">${baht(p.pricing.price)} ต่อชิ้น · ค่าจัดส่ง ${baht(p.shipping_fee)}</p>
+${error ? `<p class="err">${esc(error)}</p>` : ''}
+<form method="post" action="/p/${esc(p.slug)}/checkout" style="max-width:620px">
+  <label>จำนวน (คงเหลือ ${p.available} ชิ้น)</label>
+  <input name="qty" type="number" min="1" max="${max}" value="${input.qty}" required>
+  <label>ชื่อผู้รับ</label><input name="customer_name" value="${esc(input.name)}" required>
+  <label>เบอร์โทร</label><input name="phone" value="${esc(input.phone)}" required>
+  <label>ที่อยู่จัดส่ง</label><textarea name="address" rows="3" required>${esc(input.address)}</textarea>
+  <label>หมายเหตุ</label><textarea name="note" rows="2">${esc(input.note)}</textarea>
+  <div class="section">วิธีชำระเงิน</div>
+  <label style="font-weight:normal"><input type="radio" name="payment_method" value="transfer" style="width:auto" ${
+    input.method === 'transfer' ? 'checked' : ''
+  }> โอนชำระเต็มจำนวน (สินค้า + ค่าจัดส่ง)</label>
+  <label style="font-weight:normal"><input type="radio" name="payment_method" value="cod" style="width:auto" ${
+    input.method === 'cod' ? 'checked' : ''
+  }> เก็บเงินปลายทาง (โอนค่าจัดส่ง ${baht(p.shipping_fee)} ล่วงหน้า แล้วชำระค่าสินค้าตอนรับของ)</label>
+  <button class="btn" type="submit" style="margin-top:20px;width:100%">สั่งซื้อสินค้า</button>
+</form>`;
+}
+
+/** ขั้นตอนที่ 3: สรุปยอด ข้อมูลโอน แนบสลิป และยืนยันการสั่งซื้อ ในหน้าเดียว */
+export function checkoutStep3View(
+  p: ProductView,
+  input: CheckoutInput,
+  bankInfo: string,
+  turnstileKey: string,
+  error = '',
+): string {
+  const a = amountsFor(p, input);
+  const hidden = `<input type="hidden" name="qty" value="${input.qty}">
+  <input type="hidden" name="customer_name" value="${esc(input.name)}">
+  <input type="hidden" name="phone" value="${esc(input.phone)}">
+  <input type="hidden" name="address" value="${esc(input.address)}">
+  <input type="hidden" name="note" value="${esc(input.note)}">
+  <input type="hidden" name="payment_method" value="${input.method}">`;
+  const payLines =
+    input.method === 'cod'
+      ? `<p style="margin:0 0 6px">ชำระตอนนี้ (ค่าจัดส่ง) <strong>${baht(a.dueNow)}</strong></p>
+<p style="margin:0 0 6px">ชำระตอนรับของ (ค่าสินค้า) <strong>${baht(a.onDelivery)}</strong></p>`
+      : `<p style="margin:0 0 6px">ชำระตอนนี้ <strong>${baht(a.dueNow)}</strong></p>`;
+  return `${stepBar(3)}
+<h1 style="font-size:24px;font-weight:500;margin:0 0 12px">ยืนยันการสั่งซื้อ</h1>
+${error ? `<p class="err">${esc(error)}</p>` : ''}
+<table><tr><th>สินค้า</th><th>จำนวน</th><th>ราคา</th></tr>
+<tr><td>${esc(p.name)}</td><td>${input.qty}</td><td>${baht(a.subtotal)}</td></tr>
+<tr><td colspan="2">ค่าจัดส่ง</td><td>${baht(a.shipping)}</td></tr>
+<tr><th colspan="2">รวมทั้งสิ้น</th><th>${baht(a.total)}</th></tr></table>
+<div style="margin:16px 0;padding:16px;border:1px solid #e4e4e0;border-radius:12px">
+  ${payLines}
+  <p style="margin:12px 0 0;white-space:pre-line" class="muted">${esc(bankInfo)}</p>
+</div>
+<form method="post" action="/p/${esc(p.slug)}/order" enctype="multipart/form-data" style="max-width:620px">
+  ${hidden}
+  <label>แนบสลิปการโอน (JPG, PNG หรือ WEBP ไม่เกิน 5 MB)</label>
+  <input type="file" name="slip" accept="image/jpeg,image/png,image/webp" required>
+  ${
+    turnstileKey
+      ? `<div class="cf-turnstile" data-sitekey="${esc(turnstileKey)}" style="margin-top:12px"></div>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>`
+      : ''
+  }
+  <button class="btn" type="submit" style="margin-top:16px;width:100%">ยืนยันการสั่งซื้อ</button>
+</form>`;
+}
+
 export function orderView(
-  order: { id: number; total: number; status: string },
+  order: {
+    id: number;
+    total: number;
+    status: string;
+    payment_method: string;
+    shipping_fee: number;
+    amount_due_now: number;
+    amount_on_delivery: number;
+    slip_key: string | null;
+  },
   items: { name: string; qty: number; unit_price: number }[],
   bankInfo: string,
 ): string {
   const statusText: Record<string, string> = {
-    pending: 'รอการชำระเงิน',
+    pending: 'รอการตรวจสอบการชำระเงิน',
     paid: 'ชำระเงินแล้ว',
     cancelled: 'ยกเลิกแล้ว',
   };
+  const isCod = order.payment_method === 'cod';
+  const subtotal = items.reduce((sum, i) => sum + i.unit_price * i.qty, 0);
+  const pending = order.status === 'pending';
   return `<h1 style="font-size:24px;font-weight:500">คำสั่งซื้อ #${order.id}</h1>
-<p class="muted">สถานะ: ${esc(statusText[order.status] ?? order.status)}</p>
+<p class="muted">สถานะ: ${esc(statusText[order.status] ?? order.status)} · ${isCod ? 'เก็บเงินปลายทาง' : 'โอนชำระเต็มจำนวน'}</p>
 <table><tr><th>สินค้า</th><th>จำนวน</th><th>ราคา</th></tr>
 ${items.map((i) => `<tr><td>${esc(i.name)}</td><td>${i.qty}</td><td>${baht(i.unit_price * i.qty)}</td></tr>`).join('')}
+<tr><td colspan="2">ค่าจัดส่ง</td><td>${baht(order.shipping_fee)}</td></tr>
 <tr><th colspan="2">รวมทั้งสิ้น</th><th>${baht(order.total)}</th></tr></table>
 ${
-  order.status === 'pending'
+  pending
     ? `<div style="margin-top:20px;padding:16px;border:1px solid #e4e4e0;border-radius:12px">
-<p style="margin:0 0 8px">โอนเงินตามรายละเอียดด้านล่าง แล้วทีมงานจะยืนยันคำสั่งซื้อให้</p>
+<p style="margin:0 0 8px">${
+        isCod
+          ? `โอนค่าจัดส่ง ${baht(order.amount_due_now)} ตามรายละเอียดด้านล่าง เมื่อได้รับสินค้าให้ชำระค่าสินค้า ${baht(order.amount_on_delivery)} กับพนักงานส่ง`
+          : `โอนเงิน ${baht(order.amount_due_now)} ตามรายละเอียดด้านล่าง`
+      }</p>
+<p style="margin:0 0 8px">ทีมงานจะตรวจสลิปและยืนยันคำสั่งซื้อให้</p>
 <p style="margin:0 0 8px" class="muted">หากไม่ชำระภายใน 30 นาที ระบบจะยกเลิกออเดอร์นี้และคืนสต๊อกอัตโนมัติ</p>
 <p style="margin:0;white-space:pre-line">${esc(bankInfo)}</p></div>`
     : ''
-}`;
+}
+<p class="muted" style="font-size:12px;margin-top:12px">ยอดสินค้าก่อนค่าจัดส่ง ${baht(subtotal)}</p>`;
 }
 
 export interface AdminOrder {
@@ -189,6 +279,10 @@ export interface AdminOrder {
   total: number;
   status: string;
   created_at: string;
+  payment_method: string;
+  amount_due_now: number;
+  amount_on_delivery: number;
+  has_slip: number;
 }
 
 export function adminDashboard(products: ProductView[], orders: AdminOrder[], cats: Category[]): string {
@@ -203,7 +297,7 @@ export function adminDashboard(products: ProductView[], orders: AdminOrder[], ca
   const orderRows = orders
     .map(
       (o) => `<tr><td>#${o.id}</td><td>${esc(o.customer_name)}<br><span class="muted">${esc(o.phone)}</span></td>
-<td>${baht(o.total)}</td><td>${esc(o.status)}</td><td>${esc(o.created_at)}</td>
+<td>${baht(o.total)}<br><span class="muted">${o.payment_method === 'cod' ? `COD: โอนก่อน ${baht(o.amount_due_now)} / รับของ ${baht(o.amount_on_delivery)}` : 'โอนเต็มจำนวน'}</span></td><td>${esc(o.status)}${o.has_slip ? `<br><a href="/admin/orders/${o.id}/slip" target="_blank">ดูสลิป</a>` : ''}</td><td>${esc(o.created_at)}</td>
 <td>${
         o.status === 'pending'
           ? `<form method="post" action="/admin/orders/${o.id}/paid" style="display:inline"><button class="btn" style="padding:6px 10px;font-size:13px">ชำระแล้ว</button></form>
@@ -275,6 +369,8 @@ export function productForm(
     <div><label>ราคาปกติ (บาท)</label><input name="base_price" type="number" min="0" step="1" value="${p?.base_price ?? ''}" required></div>
     <div><label>สต๊อกในร้าน (ชิ้น)</label><input name="on_hand" type="number" min="0" step="1" value="${p?.on_hand ?? 0}" required></div>
   </div>
+  <label>ค่าจัดส่ง (บาท) ชั่วคราวจนกว่าจะเชื่อม API ขนส่ง</label>
+  <input name="shipping_fee" type="number" min="0" step="1" value="${p?.shipping_fee ?? 40}" required>
   <label>สถานะ</label>
   <select name="status"><option value="draft" ${sel('draft', p?.status ?? 'draft')}>ร่าง</option><option value="published" ${sel('published', p?.status)}>เผยแพร่</option></select>
 

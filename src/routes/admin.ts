@@ -16,7 +16,7 @@ const fail = (c: Ctx, msg: string, status = 400) =>
 admin.get('/', async (c) => {
   const [products, orders, cats] = await Promise.all([
     db.listProducts(c.env.DB, c.env.PUBLIC_IMAGE_BASE),
-    c.env.DB.prepare('SELECT id, customer_name, phone, total, status, created_at FROM orders ORDER BY id DESC LIMIT 50').all<AdminOrder>(),
+    c.env.DB.prepare("SELECT id, customer_name, phone, total, status, created_at, payment_method, amount_due_now, amount_on_delivery, (slip_key IS NOT NULL) AS has_slip FROM orders ORDER BY id DESC LIMIT 50").all<AdminOrder>(),
     db.listCategories(c.env.DB),
   ]);
   return c.html(layout('หลังบ้าน', adminDashboard(products, orders.results, cats), true));
@@ -66,11 +66,13 @@ admin.post('/products', async (c) => {
   const onHand = int(f.on_hand);
   const status = s(f.status) === 'published' ? 'published' : 'draft';
   const categoryId = int(f.category_id) > 0 ? int(f.category_id) : null;
+  const shippingFee = int(f.shipping_fee);
 
   if (!name) return fail(c, 'กรุณากรอกชื่อสินค้า');
   if (!/^[a-z0-9-]+$/.test(slug)) return fail(c, 'slug ใช้ได้เฉพาะ a-z 0-9 และ -');
   if (!(price >= 0)) return fail(c, 'ราคาต้องเป็นจำนวนเต็มตั้งแต่ 0');
   if (!(onHand >= 0)) return fail(c, 'สต๊อกต้องเป็นจำนวนเต็มตั้งแต่ 0');
+  if (!(shippingFee >= 0)) return fail(c, 'ค่าจัดส่งต้องเป็นจำนวนเต็มตั้งแต่ 0');
 
   const dk = s(f.discount_kind);
   const dkind = dk === 'percent' || dk === 'fixed' ? dk : null;
@@ -103,16 +105,16 @@ admin.post('/products', async (c) => {
 
     if (isNew) {
       const r = await DB.prepare(
-        'INSERT INTO products (name, slug, description, base_price, status, category_id) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO products (name, slug, description, base_price, shipping_fee, status, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
       )
-        .bind(name, slug, description, price, status, categoryId)
+        .bind(name, slug, description, price, shippingFee, status, categoryId)
         .run();
       productId = Number(r.meta.last_row_id);
     } else {
       await DB.prepare(
-        'UPDATE products SET name = ?, slug = ?, description = ?, base_price = ?, status = ?, category_id = ? WHERE id = ?',
+        'UPDATE products SET name = ?, slug = ?, description = ?, base_price = ?, shipping_fee = ?, status = ?, category_id = ? WHERE id = ?',
       )
-        .bind(name, slug, description, price, status, categoryId, id)
+        .bind(name, slug, description, price, shippingFee, status, categoryId, id)
         .run();
     }
 
@@ -239,6 +241,20 @@ async function settleOrder(c: Ctx, action: 'paid' | 'cancelled') {
   await audit(DB, actorOf(c), `order.${action}`, 'order', id);
   return c.redirect('/admin', 303);
 }
+
+/** ดูสลิปการโอนของออเดอร์ (อ่านจาก R2 ผ่านหลังบ้านเท่านั้น) */
+admin.get('/orders/:id/slip', async (c) => {
+  const id = Number(c.req.param('id'));
+  const row = await c.env.DB.prepare('SELECT slip_key FROM orders WHERE id = ?')
+    .bind(id)
+    .first<{ slip_key: string | null }>();
+  if (!row?.slip_key) return c.notFound();
+  const obj = await c.env.IMAGES.get(row.slip_key);
+  if (!obj) return c.notFound();
+  return new Response(obj.body, {
+    headers: { 'content-type': obj.httpMetadata?.contentType ?? 'application/octet-stream', 'cache-control': 'private, no-store' },
+  });
+});
 
 admin.post('/orders/:id/paid', (c) => settleOrder(c, 'paid'));
 admin.post('/orders/:id/cancel', (c) => settleOrder(c, 'cancelled'));

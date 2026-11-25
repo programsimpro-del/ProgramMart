@@ -13,6 +13,7 @@ export interface ProductRow {
   slug: string;
   description: string;
   base_price: number;
+  shipping_fee: number;
   status: 'draft' | 'published';
   category_id: number | null;
   category_slug: string | null;
@@ -34,7 +35,7 @@ export interface LinkInfo {
 }
 
 const SELECT_PRODUCTS = `
-  SELECT p.id, p.name, p.slug, p.description, p.base_price, p.status, p.category_id,
+  SELECT p.id, p.name, p.slug, p.description, p.base_price, p.shipping_fee, p.status, p.category_id,
          c.slug AS category_slug, c.name AS category_name,
          COALESCE(i.on_hand, 0) AS on_hand, COALESCE(i.reserved, 0) AS reserved
   FROM products p
