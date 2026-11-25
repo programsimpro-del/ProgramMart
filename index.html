@@ -110,6 +110,13 @@
 .btn-sm{width:auto;height:40px;padding:0 14px;font-size:14px}
 .btn-ghost{background:#fff;color:#1f1f1f;border:0.5px solid #b4b2a9}
 .notice{background:#faece7;color:#712b13;border-radius:8px;padding:10px 14px;margin-bottom:12px}
+.step-img{margin-left:auto;margin-right:auto}
+.variant-wrap{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.variant-wrap .variants{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;width:100%;margin-bottom:0}
+.variant-wrap.slider .variants{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:10px;scroll-behavior:smooth;min-width:0;flex:1}
+.variant-wrap.slider .variants::-webkit-scrollbar{display:none}
+.variant-wrap.slider .variant{flex:0 0 150px;scroll-snap-align:start}
+.vnav{flex:0 0 36px;height:36px;border-radius:50%;border:0.5px solid #b4b2a9;background:#fff;font-size:20px;cursor:pointer;line-height:1;padding:0}
 </style>
 </head>
 <body>
@@ -338,15 +345,20 @@ function pageCheckout(slug, d, error = '') {
   const limit = hasVariants(p) ? (pick ? variantAvail(pick) : 0) : available(p);
   const qty = Math.max(1, Math.min(v.qty || 1, limit || 1));
   const sp = esc(p.slug);
+  const many = hasVariants(p) && p.variants.length > 2;
   const variantsHtml = hasVariants(p) ? `<label class="field-label">เลือกตัวเลือกสินค้า</label>
-      <div class="variants">${p.variants.map((x) => {
-        const n = variantAvail(x);
-        return `<label class="variant ${n < 1 ? 'off' : ''}">
-          <input type="radio" name="variant" value="${esc(x.id)}" onchange="refreshSummary('${sp}')" ${pick && pick.id === x.id ? 'checked' : ''} ${n < 1 ? 'disabled' : ''}>
-          ${x.image ? `<img src="${esc(x.image)}" alt="">` : '<span class="vthumb"></span>'}
-          <span><b>${esc(x.name)}</b><small class="vprice">${baht(priceFor(p, x).price)}</small><small>${n > 0 ? 'เหลือ ' + n + ' ชิ้น' : 'หมดแล้ว'}</small></span>
-        </label>`;
-      }).join('')}</div>` : '';
+      <div class="variant-wrap${many ? ' slider' : ''}">
+        ${many ? '<button type="button" class="vnav" onclick="scrollVariants(-1)" aria-label="ดูตัวเลือกก่อนหน้า">‹</button>' : ''}
+        <div class="variants" id="variantsRow">${p.variants.map((x) => {
+          const n = variantAvail(x);
+          return `<label class="variant ${n < 1 ? 'off' : ''}">
+            <input type="radio" name="variant" value="${esc(x.id)}" onchange="refreshSummary('${sp}')" ${pick && pick.id === x.id ? 'checked' : ''} ${n < 1 ? 'disabled' : ''}>
+            ${x.image ? `<img src="${esc(x.image)}" alt="">` : '<span class="vthumb"></span>'}
+            <span><b>${esc(x.name)}</b><small class="vprice">${baht(priceFor(p, x).price)}</small><small>${n > 0 ? 'เหลือ ' + n + ' ชิ้น' : 'หมดแล้ว'}</small></span>
+          </label>`;
+        }).join('')}</div>
+        ${many ? '<button type="button" class="vnav" onclick="scrollVariants(1)" aria-label="ดูตัวเลือกถัดไป">›</button>' : ''}
+      </div>` : '';
   return `<div class="wrap narrow">
     ${p.image ? `<img class="step-img" src="${esc(p.image)}" alt="">` : '<div class="step-img thumb">รูปสินค้าจากหลังบ้าน</div>'}
     <h2 class="section-title" style="margin-bottom:12px">${esc(p.name)}</h2>
@@ -651,6 +663,10 @@ function trackClick(id, ch) {
 }
 
 /* ---------- เส้นทาง ---------- */
+function scrollVariants(dir) {
+  const row = document.getElementById('variantsRow');
+  if (row) row.scrollBy({ left: dir * 160, behavior: 'smooth' });
+}
 function render() {
   data = load();
   const h = location.hash || '#/';
