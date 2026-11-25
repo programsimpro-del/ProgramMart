@@ -141,6 +141,12 @@
 .amount-card{border:0.5px solid #e4e4e0;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px;text-align:center;margin:8px 0 16px}
 .amount-card strong{font-size:32px;color:#993c1d;font-weight:500}
 .amount-card small{color:#5f5e5a}
+.bank-card{border:0.5px solid #e4e4e0;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.bank-head{display:flex;align-items:center;gap:12px}
+.bank-logo{width:44px;height:44px;border-radius:10px;object-fit:contain;background:#fff;border:0.5px solid #e4e4e0;flex:none}
+.bank-logo-empty{display:flex;align-items:center;justify-content:center;color:#5f5e5a;font-size:20px;font-weight:500}
+.bank-acc{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f5f4ef;border-radius:10px;padding:12px 14px}
+.bank-no{font-size:20px;font-weight:500;letter-spacing:.5px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -190,7 +196,7 @@ const nowBkk = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 16
 
 function seed() {
   return {
-    bank: 'ธนาคารตัวอย่าง เลขที่บัญชี 000-0-00000-0 ชื่อบัญชี ร้านของฉัน',
+    bank: { name: 'ธนาคารตัวอย่าง', accountNo: '000-0-00000-0', accountName: 'ร้านของฉัน', logo: '' },
     categories: [
       { id: 1, name: 'เสื้อผ้า', slug: 'clothes' },
       { id: 2, name: 'ขนม', slug: 'snacks' },
@@ -213,7 +219,11 @@ function seed() {
   };
 }
 function load() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || seed(); } catch { return seed(); }
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY)) || seed();
+    if (!d.bank || typeof d.bank === 'string') d.bank = seed().bank;
+    return d;
+  } catch { return seed(); }
 }
 function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
 
@@ -457,7 +467,17 @@ function pageTransfer(slug, d, error = '') {
       <strong>${baht(s.dueNow)}</strong>
       ${method === 'cod' ? `<small>ค่าสินค้า ${baht(s.onDelivery)} ชำระตอนรับของ</small>` : ''}
     </div>
-    <div class="box"><div>โอนเข้าบัญชีด้านล่าง</div><div class="bank">${esc(data.bank)}</div></div>
+    <div class="bank-card">
+      <div class="bank-head">
+        ${data.bank.logo ? `<img class="bank-logo" src="${esc(data.bank.logo)}" alt="">` : '<span class="bank-logo bank-logo-empty">ธ</span>'}
+        <div><div class="muted" style="font-size:13px">โอนเข้าบัญชี</div><strong>${esc(data.bank.name)}</strong></div>
+      </div>
+      <div class="bank-acc">
+        <div><div class="muted" style="font-size:13px">เลขที่บัญชี</div><div class="bank-no">${esc(data.bank.accountNo)}</div></div>
+        <button type="button" class="btn btn-sm" onclick="copyAccount(this)">คัดลอก</button>
+      </div>
+      <div class="muted" style="font-size:14px">ชื่อบัญชี ${esc(data.bank.accountName)}</div>
+    </div>
     ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="slipForm" onsubmit="submitTransfer(event,'${sp}')">
       <label class="slipbtn">
@@ -548,10 +568,54 @@ function pageAdmin() {
   return `<div class="wrap">
     <h2 class="section-title">หลังบ้าน: คำสั่งซื้อ</h2>
     <div class="notice">รอตรวจสลิป ${waitSlip} รายการ · รอจัดส่ง ${waitShip} รายการ</div>
+    <div class="admin-card"><b>ตั้งค่าบัญชีรับโอน</b>
+      <label class="field-label">ชื่อธนาคาร</label><input class="trk" id="bkName" style="width:100%" value="${esc(data.bank.name)}">
+      <label class="field-label">เลขที่บัญชี</label><input class="trk" id="bkNo" style="width:100%" value="${esc(data.bank.accountNo)}">
+      <label class="field-label">ชื่อบัญชี</label><input class="trk" id="bkAcc" style="width:100%" value="${esc(data.bank.accountName)}">
+      <label class="field-label">โลโก้ธนาคาร (JPG, PNG หรือ WEBP ไม่เกิน 300 KB)</label>
+      <input type="file" id="bkLogo" accept="image/png,image/jpeg,image/webp" onchange="bankLogoPick(this)">
+      ${data.bank.logo ? `<img class="bank-logo" src="${esc(data.bank.logo)}" alt="โลโก้ปัจจุบัน" style="margin-top:8px">` : ''}
+      <div class="admin-actions"><button class="btn btn-sm" onclick="saveBank()">บันทึกบัญชี</button></div></div>
     <div class="admin-card"><label class="field-label" style="margin:0">ค่า COD (บาท) ที่ลูกค้าต้องออกเองตอนเก็บเงินปลายทาง</label>
       <div class="admin-actions"><input class="trk" id="codFeeInput" type="number" min="0" value="${data.codFee || 0}" style="width:120px"><button class="btn btn-sm" onclick="saveCodFee()">บันทึก</button></div></div>
     ${rows || '<p class="muted">ยังไม่มีคำสั่งซื้อ</p>'}
   </div>`;
+}
+
+/* ---------- บัญชีรับโอน ---------- */
+let pendingBankLogo = null;
+async function bankLogoPick(el) {
+  const file = el.files[0];
+  if (!file) { pendingBankLogo = null; return; }
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { el.value = ''; return alert('รองรับเฉพาะไฟล์ JPG, PNG และ WEBP'); }
+  if (file.size > 300 * 1024) { el.value = ''; return alert('โลโก้ต้องมีขนาดไม่เกิน 300 KB'); }
+  pendingBankLogo = await readAsDataUrl(file);
+}
+function saveBank() {
+  const accountNo = document.getElementById('bkNo').value.trim();
+  if (!accountNo) return alert('กรุณากรอกเลขที่บัญชี');
+  data.bank = {
+    name: document.getElementById('bkName').value.trim(),
+    accountNo,
+    accountName: document.getElementById('bkAcc').value.trim(),
+    logo: pendingBankLogo ?? data.bank.logo,
+  };
+  pendingBankLogo = null;
+  save(); render();
+  alert('บันทึกบัญชีแล้ว');
+}
+function copyAccount(btn) {
+  const no = data.bank.accountNo || '';
+  const done = () => { btn.textContent = 'คัดลอกแล้ว'; setTimeout(() => { btn.textContent = 'คัดลอก'; }, 1500); };
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = no; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch {}
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(no).then(done, fallback);
+  else fallback();
 }
 
 /* ---------- การทำงานของฟอร์ม ---------- */
