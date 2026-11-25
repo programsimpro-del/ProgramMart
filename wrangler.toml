@@ -1,0 +1,27 @@
+name = "shop"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shop-db"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "shop-images"
+
+[triggers]
+# ทุก 5 นาที: ยกเลิกออเดอร์ที่หมดเวลาชำระและคืนสต๊อก
+crons = ["*/5 * * * *"]
+
+[vars]
+# คีย์สาธารณะของ Turnstile (ว่างไว้ = ไม่แสดงการยืนยันบอท)
+TURNSTILE_SITE_KEY = ""
+# โดเมนสาธารณะที่ผูกกับ R2 bucket (เช่น images.example.com)
+PUBLIC_IMAGE_BASE = "https://images.example.com"
+# โดเมนหน้าร้าน ใช้ทำลิงก์สินค้าที่แปะบนเพจและ LINE
+PUBLIC_SITE_URL = "https://shop.example.com"
+# ข้อมูลบัญชีรับโอนที่แสดงหลังสั่งซื้อ
+BANK_INFO = "ธนาคารตัวอย่าง เลขที่บัญชี 000-0-00000-0 ชื่อบัญชี ร้านของฉัน"
