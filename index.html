@@ -124,6 +124,15 @@
 .warn{background:#faeeda;color:#633806;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px;line-height:1.6}
 .qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .qty-input{-moz-appearance:textfield;appearance:textfield}
+.paylist{border:0.5px solid #e4e4e0;border-radius:12px;overflow:hidden;margin:8px 0 16px}
+.payrow{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer;border-top:0.5px solid #e4e4e0}
+.paylist .payrow:first-child{border-top:0}
+.payrow .ptxt{display:flex;flex-direction:column;flex:1;font-size:15px}
+.payrow .ptxt small{color:#5f5e5a;font-size:13px}
+.payrow input[type=radio]{width:22px;height:22px;margin:0;accent-color:#1f1f1f;flex:0 0 auto}
+.pico{flex:0 0 40px;height:40px;border-radius:8px;background:#f1efe8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;color:#1f1f1f}
+.pico.cod{background:#faece7;color:#993c1d;font-size:13px}
+.paylist .codwarn{margin:0 16px 16px;border-radius:8px}
 </style>
 </head>
 <body>
@@ -408,11 +417,19 @@ function pagePay(slug, d, error = '') {
     ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="payForm" onsubmit="submitPay(event,'${sp}')">
       <label class="field-label">วิธีชำระเงิน</label>
-      <label class="option"><input type="radio" name="payment_method" value="transfer" onchange="refreshPay('${sp}')" ${method === 'transfer' ? 'checked' : ''}>
-        <div><b>โอนชำระเต็มจำนวน</b><span>ชำระค่าสินค้า</span></div></label>
-      <label class="option"><input type="radio" name="payment_method" value="cod" onchange="refreshPay('${sp}')" ${method === 'cod' ? 'checked' : ''}>
-        <div><b>เก็บเงินปลายทาง</b></div></label>
-      <div class="warn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">สั่งซื้อแบบเก็บเงินปลายทางจะมีค่าบริการ COD ที่ลูกค้าต้องชำระก่อน เพื่อป้องกันลูกค้าสั่งซื้อแล้วไม่รับสินค้า</div>
+      <div class="paylist">
+        <label class="payrow">
+          <span class="pico">฿</span>
+          <span class="ptxt"><b>โอนชำระเต็มจำนวน</b><small>ชำระค่าสินค้า</small></span>
+          <input type="radio" name="payment_method" value="transfer" onchange="refreshPay('${sp}')" ${method === 'transfer' ? 'checked' : ''}>
+        </label>
+        <label class="payrow">
+          <span class="pico cod">COD</span>
+          <span class="ptxt"><b>เก็บเงินปลายทาง</b></span>
+          <input type="radio" name="payment_method" value="cod" onchange="refreshPay('${sp}')" ${method === 'cod' ? 'checked' : ''}>
+        </label>
+        <div class="warn codwarn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">สั่งซื้อแบบเก็บเงินปลายทางจะมีค่าบริการ COD ที่ลูกค้าต้องชำระก่อน เพื่อป้องกันลูกค้าสั่งซื้อแล้วไม่รับสินค้า</div>
+      </div>
       <div id="summary">${summaryHtml(p, vr, d.qty, method)}</div>
       <div class="box">
         <div>โอนเข้าบัญชีด้านล่าง แล้วแนบสลิป</div>
