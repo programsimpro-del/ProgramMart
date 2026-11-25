@@ -141,12 +141,21 @@
 .amount-card{border:0.5px solid #e4e4e0;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px;text-align:center;margin:8px 0 16px}
 .amount-card strong{font-size:32px;color:#993c1d;font-weight:500}
 .amount-card small{color:#5f5e5a}
-.bank-card{border:0.5px solid #e4e4e0;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;margin:12px 0}
-.bank-head{display:flex;align-items:center;gap:12px}
-.bank-logo{width:44px;height:44px;border-radius:10px;object-fit:contain;background:#fff;border:0.5px solid #e4e4e0;flex:none}
-.bank-logo-empty{display:flex;align-items:center;justify-content:center;color:#5f5e5a;font-size:20px;font-weight:500}
-.bank-acc{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f5f4ef;border-radius:10px;padding:12px 14px}
-.bank-no{font-size:20px;font-weight:500;letter-spacing:.5px;font-variant-numeric:tabular-nums}
+.bank-ticket{display:grid;grid-template-columns:104px 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #cfe0f5;margin:12px 0}
+.bank-side{background:linear-gradient(160deg,#1a73e8,#0b4fb3);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px 8px;text-align:center}
+.bank-side img{width:56px;height:56px;object-fit:contain;background:#fff;border-radius:12px;padding:4px}
+.bank-side-empty{width:56px;height:56px;border-radius:12px;background:#fff;color:#0b4fb3;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600}
+.bank-side small{font-size:12px;font-weight:500;line-height:1.3}
+.bank-main{padding:14px 16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.bank-type{align-self:flex-start;background:#0b2e6b;color:#fff;border-radius:6px;padding:3px 10px;font-size:13px}
+.bank-owner{font-size:15px;color:#1f1f1f;word-break:break-word}
+.bank-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #e6eefa;padding-top:10px}
+.bank-label{font-size:14px;color:#1f1f1f}
+.bank-sep{width:1px;height:20px;background:#cfd8e6}
+.bank-pill{background:#1a73e8;color:#fff;border-radius:6px;padding:2px 8px;font-size:13px}
+.bank-no{font-size:clamp(20px,6vw,28px);font-weight:700;color:#0b3d91;letter-spacing:.5px;font-variant-numeric:tabular-nums}
+.bank-copy{align-self:flex-start;border:1px solid #1a73e8;background:#fff;color:#1a73e8;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit}
+.bank-copy:hover{background:#eef5ff}
 </style>
 </head>
 <body>
@@ -196,7 +205,7 @@ const nowBkk = () => new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 16
 
 function seed() {
   return {
-    bank: { name: 'ธนาคารตัวอย่าง', accountNo: '000-0-00000-0', accountName: 'ร้านของฉัน', logo: '' },
+    bank: { name: 'ธนาคารตัวอย่าง', type: 'บัญชีออมทรัพย์', accountNo: '000-0-00000-0', accountName: 'ร้านของฉัน', logo: '' },
     categories: [
       { id: 1, name: 'เสื้อผ้า', slug: 'clothes' },
       { id: 2, name: 'ขนม', slug: 'snacks' },
@@ -467,16 +476,22 @@ function pageTransfer(slug, d, error = '') {
       <strong>${baht(s.dueNow)}</strong>
       ${method === 'cod' ? `<small>ค่าสินค้า ${baht(s.onDelivery)} ชำระตอนรับของ</small>` : ''}
     </div>
-    <div class="bank-card">
-      <div class="bank-head">
-        ${data.bank.logo ? `<img class="bank-logo" src="${esc(data.bank.logo)}" alt="">` : '<span class="bank-logo bank-logo-empty">ธ</span>'}
-        <div><div class="muted" style="font-size:13px">โอนเข้าบัญชี</div><strong>${esc(data.bank.name)}</strong></div>
+    <div class="bank-ticket">
+      <div class="bank-side">
+        ${data.bank.logo ? `<img src="${esc(data.bank.logo)}" alt="">` : '<span class="bank-side-empty">ธ</span>'}
+        <small>${esc(data.bank.name)}</small>
       </div>
-      <div class="bank-acc">
-        <div><div class="muted" style="font-size:13px">เลขที่บัญชี</div><div class="bank-no">${esc(data.bank.accountNo)}</div></div>
-        <button type="button" class="btn btn-sm" onclick="copyAccount(this)">คัดลอก</button>
+      <div class="bank-main">
+        <span class="bank-type">${esc(data.bank.type || 'บัญชีออมทรัพย์')}</span>
+        <div class="bank-owner">ชื่อ ${esc(data.bank.accountName)}</div>
+        <div class="bank-line">
+          <span class="bank-label">ธนาคาร ${esc(data.bank.name)}</span>
+          <span class="bank-sep"></span>
+          <span class="bank-pill">เลขที่</span>
+          <span class="bank-no">${esc(data.bank.accountNo)}</span>
+        </div>
+        <button type="button" class="bank-copy" onclick="copyAccount(this)">คัดลอกเลขบัญชี</button>
       </div>
-      <div class="muted" style="font-size:14px">ชื่อบัญชี ${esc(data.bank.accountName)}</div>
     </div>
     ${error ? `<p class="err">${esc(error)}</p>` : ''}
     <form id="slipForm" onsubmit="submitTransfer(event,'${sp}')">
@@ -571,6 +586,7 @@ function pageAdmin() {
     <div class="admin-card"><b>ตั้งค่าบัญชีรับโอน</b>
       <label class="field-label">ชื่อธนาคาร</label><input class="trk" id="bkName" style="width:100%" value="${esc(data.bank.name)}">
       <label class="field-label">เลขที่บัญชี</label><input class="trk" id="bkNo" style="width:100%" value="${esc(data.bank.accountNo)}">
+      <label class="field-label">ประเภทบัญชี</label><input class="trk" id="bkType" style="width:100%" value="${esc(data.bank.type || 'บัญชีออมทรัพย์')}">
       <label class="field-label">ชื่อบัญชี</label><input class="trk" id="bkAcc" style="width:100%" value="${esc(data.bank.accountName)}">
       <label class="field-label">โลโก้ธนาคาร (JPG, PNG หรือ WEBP ไม่เกิน 300 KB)</label>
       <input type="file" id="bkLogo" accept="image/png,image/jpeg,image/webp" onchange="bankLogoPick(this)">
@@ -596,6 +612,7 @@ function saveBank() {
   if (!accountNo) return alert('กรุณากรอกเลขที่บัญชี');
   data.bank = {
     name: document.getElementById('bkName').value.trim(),
+    type: document.getElementById('bkType').value.trim() || 'บัญชีออมทรัพย์',
     accountNo,
     accountName: document.getElementById('bkAcc').value.trim(),
     logo: pendingBankLogo ?? data.bank.logo,
@@ -606,7 +623,7 @@ function saveBank() {
 }
 function copyAccount(btn) {
   const no = data.bank.accountNo || '';
-  const done = () => { btn.textContent = 'คัดลอกแล้ว'; setTimeout(() => { btn.textContent = 'คัดลอก'; }, 1500); };
+  const done = () => { btn.textContent = 'คัดลอกแล้ว'; setTimeout(() => { btn.textContent = 'คัดลอกเลขบัญชี'; }, 1500); };
   const fallback = () => {
     const ta = document.createElement('textarea');
     ta.value = no; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
