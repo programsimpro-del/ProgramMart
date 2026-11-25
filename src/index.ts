@@ -5,7 +5,7 @@ import { admin } from './routes/admin';
 import { layout, errorBox } from './views';
 import { releaseExpiredOrders } from './expiry';
 
-const app = new Hono<{ Bindings: Env }>();
+export const app = new Hono<{ Bindings: Env }>();
 
 /**
  * ป้องกันหลังบ้าน:
