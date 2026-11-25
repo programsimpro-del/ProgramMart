@@ -133,6 +133,14 @@
 .pico{flex:0 0 40px;height:40px;border-radius:8px;background:#f1efe8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;color:#1f1f1f}
 .pico.cod{background:#faece7;color:#993c1d;font-size:13px}
 .paylist .codwarn{margin:0 16px 16px;border-radius:8px}
+.slipbtn{display:flex;flex-direction:column;align-items:center;gap:6px;border:1.5px dashed #b4b2a9;border-radius:14px;padding:22px 16px;background:#fbfaf6;cursor:pointer;text-align:center;margin:12px 0}
+.slipbtn:hover{border-color:#1f1f1f}
+.slipbtn .sicon{width:48px;height:48px;border-radius:50%;background:#1f1f1f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;line-height:1}
+.slipbtn b{font-weight:500;font-size:16px}
+.slipbtn small{color:#5f5e5a;font-size:13px}
+.amount-card{border:0.5px solid #e4e4e0;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:4px;text-align:center;margin:8px 0 16px}
+.amount-card strong{font-size:32px;color:#993c1d;font-weight:500}
+.amount-card small{color:#5f5e5a}
 </style>
 </head>
 <body>
@@ -429,14 +437,37 @@ function pagePay(slug, d, error = '') {
         <div class="warn codwarn" id="codWarn" style="display:${method === 'cod' ? 'block' : 'none'}">สั่งซื้อแบบเก็บเงินปลายทางจะมีค่าบริการ COD ที่ลูกค้าต้องชำระก่อน เพื่อป้องกันลูกค้าสั่งซื้อแล้วไม่รับสินค้า</div>
       </div>
       <div id="summary">${summaryHtml(p, vr, d.qty, method)}</div>
-      <div class="box">
-        <div>โอนเข้าบัญชีด้านล่าง แล้วแนบสลิป</div>
-        <div class="bank">${esc(data.bank)}</div>
-      </div>
-      <label class="field-label">แนบสลิปการโอน (JPG, PNG หรือ WEBP ไม่เกิน 2 MB)</label>
-      <div class="field"><input type="file" name="slip" accept="image/jpeg,image/png,image/webp" ${d.slip ? '' : 'required'} onchange="previewSlip(this)"></div>
+      <button class="btn" type="submit" style="margin-top:24px">ยืนยัน</button>
+    </form>
+  </div>`;
+}
+
+/* ขั้นตอนที่ 3: ยอดและเลขบัญชี แล้วแนบสลิป */
+function pageTransfer(slug, d, error = '') {
+  const p = productBySlug(slug);
+  if (!p || !d || d.slug !== slug) return pageNotFound();
+  const vr = hasVariants(p) ? p.variants.find((x) => x.id === d.variant) : null;
+  const method = d.method === 'cod' ? 'cod' : 'transfer';
+  const s = summaryFor(p, vr, d.qty, method);
+  const sp = esc(p.slug);
+  return `<div class="wrap narrow">
+    <h2 class="section-title" style="margin-bottom:12px">โอนเงิน</h2>
+    <div class="amount-card">
+      <span class="muted">ยอดที่ต้องโอน</span>
+      <strong>${baht(s.dueNow)}</strong>
+      ${method === 'cod' ? `<small>ค่าสินค้า ${baht(s.onDelivery)} ชำระตอนรับของ</small>` : ''}
+    </div>
+    <div class="box"><div>โอนเข้าบัญชีด้านล่าง</div><div class="bank">${esc(data.bank)}</div></div>
+    ${error ? `<p class="err">${esc(error)}</p>` : ''}
+    <form id="slipForm" onsubmit="submitTransfer(event,'${sp}')">
+      <label class="slipbtn">
+        <input type="file" name="slip" accept="image/jpeg,image/png,image/webp" hidden onchange="previewSlip(this)">
+        <span class="sicon">+</span>
+        <b>${d.slip ? 'เปลี่ยนสลิปการโอน' : 'แนบสลิปการโอน'}</b>
+        <small>JPG, PNG หรือ WEBP ไม่เกิน 2 MB</small>
+      </label>
       <img id="slipPreview" class="slip-preview" ${d.slip ? `src="${esc(d.slip)}"` : ''} style="${d.slip ? '' : 'display:none'}" alt="">
-      <button class="btn" type="submit" style="margin-top:24px">แจ้งชำระเงินแล้ว</button>
+      <button class="btn" type="submit" style="margin-top:16px">ถัดไป กรอกที่อยู่จัดส่ง</button>
     </form>
   </div>`;
 }
@@ -596,13 +627,20 @@ function readAsDataUrl(file) {
   });
 }
 
-async function submitPay(e, slug) {
+function submitPay(e, slug) {
   e.preventDefault();
   const p = productBySlug(slug);
   if (!p || !draft || draft.slug !== slug) return alert('ข้อมูลไม่ครบ กรุณาเริ่มสั่งซื้อใหม่');
-  const form = e.target;
-  const method = form.elements.payment_method.value === 'cod' ? 'cod' : 'transfer';
-  const file = form.elements.slip.files[0];
+  const method = e.target.elements.payment_method.value === 'cod' ? 'cod' : 'transfer';
+  setDraft({ ...draft, method });
+  location.hash = `#/p/${slug}/transfer`;
+}
+
+async function submitTransfer(e, slug) {
+  e.preventDefault();
+  const p = productBySlug(slug);
+  if (!p || !draft || draft.slug !== slug) return alert('ข้อมูลไม่ครบ กรุณาเริ่มสั่งซื้อใหม่');
+  const file = e.target.elements.slip.files[0];
   let slip = draft.slip;
   if (file) {
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return alert('รองรับเฉพาะไฟล์ JPG, PNG และ WEBP');
@@ -610,7 +648,7 @@ async function submitPay(e, slug) {
     slip = await readAsDataUrl(file);
   }
   if (!slip) return alert('กรุณาแนบสลิปการโอน');
-  setDraft({ ...draft, method, slip });
+  setDraft({ ...draft, slip });
   location.hash = `#/p/${slug}/address`;
 }
 
@@ -719,6 +757,7 @@ function render() {
   if (h === '#/admin') html = pageAdmin();
   else if ((m = h.match(/^#\/p\/([^/]+)\/checkout$/))) html = pageCheckout(m[1], draft);
   else if ((m = h.match(/^#\/p\/([^/]+)\/pay$/))) html = pagePay(m[1], draft);
+  else if ((m = h.match(/^#\/p\/([^/]+)\/transfer$/))) html = pageTransfer(m[1], draft);
   else if ((m = h.match(/^#\/p\/([^/]+)\/address$/))) html = pageAddress(m[1], draft);
   else if ((m = h.match(/^#\/p\/([^/]+)$/))) html = pageProduct(m[1]);
   else if ((m = h.match(/^#\/c\/([^/]+)$/))) html = pageCategory(m[1]);
